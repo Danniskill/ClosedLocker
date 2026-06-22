@@ -60,6 +60,7 @@ static int _languageTemp = 0; //use for smart switch key
 static vector<Byte> savedSmartSwitchKeyData; ////use for smart switch key
 
 static bool _hasJustUsedHotKey = false;
+static bool _winKeyUsedInHotKey = false; // track if Win key should be suppressed
 
 static INPUT backspaceEvent[2];
 static INPUT keyEvent[2];
@@ -540,18 +541,36 @@ LRESULT CALLBACK keyboardHookProcess(int nCode, WPARAM wParam, LPARAM lParam) {
 			if (GET_SWITCH_KEY(vSwitchKeyStatus) == _keycode && checkHotKey(vSwitchKeyStatus, GET_SWITCH_KEY(vSwitchKeyStatus) != 0xFE)) {
 				switchLanguage();
 				_hasJustUsedHotKey = true;
+				_winKeyUsedInHotKey = (_lastFlag & MASK_WIN) != 0;
 				_keycode = 0;
 				return -1;
 			}
 			if (GET_SWITCH_KEY(convertToolHotKey) == _keycode && checkHotKey(convertToolHotKey, GET_SWITCH_KEY(convertToolHotKey) != 0xFE)) {
 				AppDelegate::getInstance()->onQuickConvert();
 				_hasJustUsedHotKey = true;
+				_winKeyUsedInHotKey = (_lastFlag & MASK_WIN) != 0;
 				_keycode = 0;
 				return -1;
 			}
 		}
 		_hasJustUsedHotKey = _lastFlag != 0;
 	} else if (_isFlagKey) {
+		// When Win key was part of a consumed hotkey, inject a no-op key to prevent
+		// Start menu from opening, then let Win key UP pass through normally
+		if (_winKeyUsedInHotKey && (wParam == WM_KEYUP || wParam == WM_SYSKEYUP) &&
+			(keyboardData->vkCode == VK_LWIN || keyboardData->vkCode == VK_RWIN)) {
+			_winKeyUsedInHotKey = false;
+			// Inject a benign key press+release to break the clean Win key sequence
+			INPUT noopInputs[2] = {};
+			noopInputs[0].type = INPUT_KEYBOARD;
+			noopInputs[0].ki.wVk = 0xFF; // undefined/no-op virtual key
+			noopInputs[0].ki.dwFlags = 0;
+			noopInputs[1].type = INPUT_KEYBOARD;
+			noopInputs[1].ki.wVk = 0xFF;
+			noopInputs[1].ki.dwFlags = KEYEVENTF_KEYUP;
+			SendInput(2, noopInputs, sizeof(INPUT));
+			// Fall through to let Win key UP pass normally
+		}
 		if (_lastFlag == 0 || _lastFlag < _flag)
 			_lastFlag = _flag;
 		else if (_lastFlag > _flag) {
@@ -559,10 +578,12 @@ LRESULT CALLBACK keyboardHookProcess(int nCode, WPARAM wParam, LPARAM lParam) {
 			if (checkHotKey(vSwitchKeyStatus, GET_SWITCH_KEY(vSwitchKeyStatus) != 0xFE)) {
 				switchLanguage();
 				_hasJustUsedHotKey = true;
+				_winKeyUsedInHotKey = (_lastFlag & MASK_WIN) != 0;
 			}
 			if (checkHotKey(convertToolHotKey, GET_SWITCH_KEY(convertToolHotKey) != 0xFE)) {
 				AppDelegate::getInstance()->onQuickConvert();
 				_hasJustUsedHotKey = true;
+				_winKeyUsedInHotKey = (_lastFlag & MASK_WIN) != 0;
 			}
 			//check temporarily turn off spell checking
 			if (vTempOffSpelling && !_hasJustUsedHotKey && _lastFlag & MASK_CONTROL) {

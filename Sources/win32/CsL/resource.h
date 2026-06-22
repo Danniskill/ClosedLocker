@@ -180,6 +180,9 @@
 #define IDS_STRING_MACRO_AUTO_CAP       1065
 #define IDS_STRING_START_CONSONANT      1066
 #define IDS_STRING_END_CONSONANT        1067
+#define IDC_EDIT_ABOUT_DETAILS          1070
+#define IDC_STATIC_AUTHOR1              1071
+#define IDC_STATIC_AUTHOR2              1072
 #define IDC_STATIC                      -1
 
 // Next default values for new objects

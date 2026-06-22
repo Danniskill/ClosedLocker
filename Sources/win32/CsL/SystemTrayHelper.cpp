@@ -65,6 +65,7 @@ map<UINT, LPCTSTR> menuData = {
 	{POPUP_CONVERT_TOOL, _T("Công cụ chuyển mã...")},
 	{POPUP_QUICK_CONVERT, _T("Chuyển mã nhanh")},
 	{POPUP_CONTROL_PANEL, _T("Bảng điều khiển...")},
+	{POPUP_ABOUT_OPENKEY, _T("Thông tin...")},
 	{POPUP_OPENKEY_EXIT, _T("Thoát")},
 };
 
@@ -129,6 +130,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) 
 				break;
 			case POPUP_CONTROL_PANEL:
 				AppDelegate::getInstance()->onControlPanel();
+				break;
+			case POPUP_ABOUT_OPENKEY:
+				AppDelegate::getInstance()->onOpenKeyAbout();
 				break;
 			case POPUP_OPENKEY_EXIT:
 				AppDelegate::getInstance()->onOpenKeyExit();
@@ -198,6 +202,7 @@ void SystemTrayHelper::createPopupMenu() {
 	AppendMenu(popupMenu, MF_SEPARATOR, 0, 0);
 
 	AppendMenu(popupMenu, MF_STRING, POPUP_CONTROL_PANEL, menuData[POPUP_CONTROL_PANEL]);
+	AppendMenu(popupMenu, MF_STRING, POPUP_ABOUT_OPENKEY, menuData[POPUP_ABOUT_OPENKEY]);
 	AppendMenu(popupMenu, MF_SEPARATOR, 0, 0);
 	AppendMenu(popupMenu, MF_UNCHECKED, POPUP_OPENKEY_EXIT, menuData[POPUP_OPENKEY_EXIT]);
 

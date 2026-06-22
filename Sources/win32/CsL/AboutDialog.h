@@ -23,4 +23,5 @@ public:
 	~AboutDialog();
 	virtual void fillData() override;
 private:
+	HFONT _hBoldFont = NULL;
 };

@@ -1446,6 +1446,8 @@ void vKeyHandleEvent(const vKeyEvent& event,
                 }
                 if (vCheckSpelling)
                     checkSpelling();
+                else
+                    tempDisableKey = false; // reset after backspace so special keys work again on the shorter word
             }
             if (vUseMacro && hMacroKey.size() > 0) {
                 hMacroKey.pop_back();

@@ -20,6 +20,9 @@ AboutDialog::AboutDialog(const HINSTANCE & hInstance, const int & resourceId)
 }
 
 AboutDialog::~AboutDialog() {
+	if (_hBoldFont) {
+		DeleteObject(_hBoldFont);
+	}
 }
 
 void AboutDialog::fillData() {
@@ -63,17 +66,35 @@ void AboutDialog::initDialog() {
 	//dialog icon
 	SET_DIALOG_ICON(IDI_APP_ICON);
 	
-	HFONT hFont = CreateFont(48, 0, 0, 0, FW_THIN, FALSE, FALSE, FALSE,
-		ANSI_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, 
-		DEFAULT_PITCH | FF_SWISS | FF_MODERN, _T("Segoe UI"));
-	SendDlgItemMessage(hDlg, IDC_STATIC_APP_TITLE, WM_SETFONT, WPARAM(hFont), TRUE);
+	wchar_t titleBuffer[256];
+#ifdef _WIN64
+	wsprintfW(titleBuffer, _T("CsL (64 bit) - Bộ gõ tiếng Việt tối giản"));
+#else
+	wsprintfW(titleBuffer, _T("CsL (32 bit) - Bộ gõ tiếng Việt tối giản"));
+#endif
+	SendDlgItemMessage(hDlg, IDC_STATIC_APP_TITLE, WM_SETTEXT, 0, LPARAM(titleBuffer));
 
-	wchar_t buffer[256];
-	wsprintfW(buffer, _T("Phiên bản %s cho Windows - Ngày cập nhật: %s"), OpenKeyHelper::getVersionString().c_str(), _T(__DATE__));
-	SendDlgItemMessage(hDlg, IDC_STATIC_APP_VERSION, WM_SETTEXT, 0, LPARAM(buffer));
+	wchar_t versionBuffer[256];
+	wsprintfW(versionBuffer, _T("Phiên bản: %s"), OpenKeyHelper::getVersionString().c_str());
+	SendDlgItemMessage(hDlg, IDC_STATIC_APP_VERSION, WM_SETTEXT, 0, LPARAM(versionBuffer));
 
-	hFont = CreateFont(20, 0, 0, 0, FW_DONTCARE, FALSE, FALSE, FALSE,
-		ANSI_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY,
-		DEFAULT_PITCH | FF_SWISS | FF_MODERN, _T("Arial"));
-	SendDlgItemMessage(hDlg, IDC_STATIC_APP_SUB_TITLE, WM_SETFONT, WPARAM(hFont), TRUE);
+	wchar_t captionBuffer[256];
+	wsprintfW(captionBuffer, _T("Thông tin CsL %s"), OpenKeyHelper::getVersionString().c_str());
+	SetWindowText(hDlg, captionBuffer);
+
+	// Set bold font for authors
+	HFONT hFont = (HFONT)SendDlgItemMessage(hDlg, IDC_STATIC_AUTHOR1, WM_GETFONT, 0, 0);
+	if (hFont) {
+		LOGFONT lf;
+		GetObject(hFont, sizeof(LOGFONT), &lf);
+		lf.lfWeight = FW_BOLD;
+		_hBoldFont = CreateFontIndirect(&lf);
+		SendDlgItemMessage(hDlg, IDC_STATIC_AUTHOR1, WM_SETFONT, (WPARAM)_hBoldFont, TRUE);
+		SendDlgItemMessage(hDlg, IDC_STATIC_AUTHOR2, WM_SETFONT, (WPARAM)_hBoldFont, TRUE);
+	}
+
+	HINSTANCE hIns = (HINSTANCE)GetWindowLongPtr(hDlg, GWLP_HINSTANCE);
+	SendDlgItemMessage(hDlg, IDBUTTON_OK, BM_SETIMAGE, IMAGE_ICON, (LPARAM)LoadIcon(hIns, MAKEINTRESOURCEW(IDI_ICON_OK_BUTTON)));
 }
+
+

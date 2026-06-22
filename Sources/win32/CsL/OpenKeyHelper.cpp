@@ -294,7 +294,7 @@ DWORD OpenKeyHelper::getVersionNumber() {
 }
 
 wstring OpenKeyHelper::getVersionString() {
-	return wstring(_T("2026.20.06"));
+	return wstring(_T("2026.23.06"));
 
 	// get the filename of the executable containing the version resource
 	TCHAR szFilename[MAX_PATH + 1] = { 0 };

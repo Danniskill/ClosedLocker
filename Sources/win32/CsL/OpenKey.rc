@@ -87,25 +87,22 @@ END
 //
 
 
-IDD_ABOUTBOX DIALOGEX 0, 0, 287, 157
+IDD_ABOUTBOX DIALOGEX 0, 0, 210, 150
 STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | DS_CENTER | WS_POPUP | WS_CAPTION | WS_SYSMENU
-CAPTION "Giới thiệu CsL"
-FONT 8, "MS Shell Dlg", 0, 0, 0x1
+CAPTION "Thông tin CsL"
+FONT 9, "Segoe UI", 400, 0, 0x1
 BEGIN
-    ICON            IDI_APP_ICON,IDC_STATIC,14,17,20,20
-    LTEXT           "CsL",IDC_STATIC_APP_TITLE,45,14,206,33,SS_NOPREFIX
-    LTEXT           "Bộ gõ Tiếng Việt nguồn mở đa nền tảng",IDC_STATIC_APP_SUB_TITLE,45,40,215,12
-    LTEXT           "Phien ban",IDC_STATIC_APP_VERSION,45,52,227,8
-    CONTROL         "<a>https://github.com/tuyenvm/OpenKey</a>",IDC_SYSLINK_HOME_PAGE,
-                    "SysLink",WS_TABSTOP,105,79,152,10
-    LTEXT           "Trang chủ:",IDC_STATIC_APP_SUB_TITLE2,45,79,47,8
-    LTEXT           "Phiên bản mới:",IDC_STATIC_APP_SUB_TITLE3,45,91,58,8
-    LTEXT           "Fanpage:",IDC_STATIC_APP_SUB_TITLE4,45,103,47,8
-    CONTROL         "<a>https://github.com/tuyenvm/OpenKey/releases</a>",IDC_SYSLINK_NEW_VERSION,
-                    "SysLink",WS_TABSTOP,105,91,175,10
-    CONTROL         "<a>https://www.facebook.com/OpenKeyVN</a>",IDC_SYSLINK_FANPAGE,
-                    "SysLink",WS_TABSTOP,105,104,175,10
-    CTEXT           "Danniskill © 2026",IDC_STATIC_APP_SUB_TITLE5,80,142,130,8
+    CONTROL         "",IDC_STATIC,"Static",SS_ETCHEDFRAME,7,7,196,50
+    ICON            IDI_APP_ICON,IDC_STATIC,14,14,20,20
+    LTEXT           "CsL",IDC_STATIC_APP_TITLE,42,14,150,10,SS_NOPREFIX
+    LTEXT           "Phiên bản",IDC_STATIC_APP_VERSION,42,30,150,8
+    CONTROL         "",IDC_STATIC,"Static",SS_ETCHEDFRAME,7,63,196,55
+    CTEXT           "CsL - a fork version of OpenKey by",IDC_STATIC, 10, 67, 190, 8
+    CTEXT           "Mai Vu Tuyen",IDC_STATIC_AUTHOR1, 10, 77, 190, 8
+    CTEXT           "Build by",IDC_STATIC, 10, 87, 190, 8
+    CTEXT           "Danniskill and TrungTurbo",IDC_STATIC_AUTHOR2, 10, 97, 190, 8
+    CTEXT           "Thanks for using it!",IDC_STATIC, 10, 107, 190, 8
+    DEFPUSHBUTTON   "Đóng",IDBUTTON_OK,70,123,70,21
 END
 
 IDD_DIALOG_MAIN DIALOGEX 0, 0, 297, 250
@@ -375,12 +372,12 @@ BEGIN
         BEGIN
             VALUE "CompanyName", "Danniskill"
             VALUE "FileDescription", "CsL - Bộ gõ Tiếng Việt nguồn mở"
-            VALUE "FileVersion", "2026.20.06.0"
+            VALUE "FileVersion", "2026.23.06.0"
             VALUE "InternalName", "CsL.exe"
             VALUE "LegalCopyright", "Copyright (C) 2026 - Danniskill"
             VALUE "OriginalFilename", "CsL.exe"
             VALUE "ProductName", "CsL"
-            VALUE "ProductVersion", "2026.20.06.0"
+            VALUE "ProductVersion", "2026.23.06.0"
         END
     END
     BLOCK "VarFileInfo"

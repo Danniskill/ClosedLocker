@@ -1,0 +1,17 @@
+d:\Csl\Sources\engine\ConvertTool.cpp;d:\Csl\Sources\win32\CsL\CsL\x64\Release\ConvertTool.obj
+d:\Csl\Sources\engine\Engine.cpp;d:\Csl\Sources\win32\CsL\CsL\x64\Release\Engine.obj
+d:\Csl\Sources\engine\Macro.cpp;d:\Csl\Sources\win32\CsL\CsL\x64\Release\Macro.obj
+d:\Csl\Sources\engine\SmartSwitchKey.cpp;d:\Csl\Sources\win32\CsL\CsL\x64\Release\SmartSwitchKey.obj
+d:\Csl\Sources\engine\Vietnamese.cpp;d:\Csl\Sources\win32\CsL\CsL\x64\Release\Vietnamese.obj
+d:\Csl\Sources\win32\CsL\AboutDialog.cpp;d:\Csl\Sources\win32\CsL\CsL\x64\Release\AboutDialog.obj
+d:\Csl\Sources\win32\CsL\AppDelegate.cpp;d:\Csl\Sources\win32\CsL\CsL\x64\Release\AppDelegate.obj
+d:\Csl\Sources\win32\CsL\BaseDialog.cpp;d:\Csl\Sources\win32\CsL\CsL\x64\Release\BaseDialog.obj
+d:\Csl\Sources\win32\CsL\ConvertToolDialog.cpp;d:\Csl\Sources\win32\CsL\CsL\x64\Release\ConvertToolDialog.obj
+d:\Csl\Sources\win32\CsL\MacroDialog.cpp;d:\Csl\Sources\win32\CsL\CsL\x64\Release\MacroDialog.obj
+d:\Csl\Sources\win32\CsL\main.cpp;d:\Csl\Sources\win32\CsL\CsL\x64\Release\main.obj
+d:\Csl\Sources\win32\CsL\MainControlDialog.cpp;d:\Csl\Sources\win32\CsL\CsL\x64\Release\MainControlDialog.obj
+d:\Csl\Sources\win32\CsL\OpenKey.cpp;d:\Csl\Sources\win32\CsL\CsL\x64\Release\OpenKey.obj
+d:\Csl\Sources\win32\CsL\OpenKeyHelper.cpp;d:\Csl\Sources\win32\CsL\CsL\x64\Release\OpenKeyHelper.obj
+d:\Csl\Sources\win32\CsL\OpenKeyManager.cpp;d:\Csl\Sources\win32\CsL\CsL\x64\Release\OpenKeyManager.obj
+d:\Csl\Sources\win32\CsL\stdafx.cpp;d:\Csl\Sources\win32\CsL\CsL\x64\Release\stdafx.obj
+d:\Csl\Sources\win32\CsL\SystemTrayHelper.cpp;d:\Csl\Sources\win32\CsL\CsL\x64\Release\SystemTrayHelper.obj

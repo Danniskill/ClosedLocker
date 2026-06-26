@@ -68,9 +68,9 @@ void AboutDialog::initDialog() {
 	
 	wchar_t titleBuffer[256];
 #ifdef _WIN64
-	wsprintfW(titleBuffer, _T("CsL (64 bit) - Bộ gõ tiếng Việt tối giản"));
+	wsprintfW(titleBuffer, _T("CsLite (64 bit) - Bộ gõ tiếng Việt tối giản"));
 #else
-	wsprintfW(titleBuffer, _T("CsL (32 bit) - Bộ gõ tiếng Việt tối giản"));
+	wsprintfW(titleBuffer, _T("CsLite (32 bit) - Bộ gõ tiếng Việt tối giản"));
 #endif
 	SendDlgItemMessage(hDlg, IDC_STATIC_APP_TITLE, WM_SETTEXT, 0, LPARAM(titleBuffer));
 
@@ -79,7 +79,7 @@ void AboutDialog::initDialog() {
 	SendDlgItemMessage(hDlg, IDC_STATIC_APP_VERSION, WM_SETTEXT, 0, LPARAM(versionBuffer));
 
 	wchar_t captionBuffer[256];
-	wsprintfW(captionBuffer, _T("Thông tin CsL %s"), OpenKeyHelper::getVersionString().c_str());
+	wsprintfW(captionBuffer, _T("Thông tin CsLite %s"), OpenKeyHelper::getVersionString().c_str());
 	SetWindowText(hDlg, captionBuffer);
 
 	// Set bold font for authors

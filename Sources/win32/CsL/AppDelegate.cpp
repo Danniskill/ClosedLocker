@@ -51,8 +51,7 @@ int vRunAsAdmin = 0;
 int vFixChromiumBrowser = 0; //new on version 2.0
 
 bool AppDelegate::isDialogMsg(MSG & msg) const {
-	return (mainDialog != NULL && IsDialogMessage(mainDialog->getHwnd(), &msg)) ||
-		(macroDialog != NULL && IsDialogMessage(macroDialog->getHwnd(), &msg)) || 
+	return (macroDialog != NULL && IsDialogMessage(macroDialog->getHwnd(), &msg)) || 
 		(convertDialog != NULL && IsDialogMessage(convertDialog->getHwnd(), &msg)) || 
 		(aboutDialog != NULL && IsDialogMessage(aboutDialog->getHwnd(), &msg));
 }
@@ -85,11 +84,6 @@ int AppDelegate::run(HINSTANCE hInstance) {
 	SystemTrayHelper::createSystemTrayIcon(hInstance);
 	SystemTrayHelper::updateData();
 
-	//create main control
-	if (vShowOnStartUp)
-		createMainDialog();
-	MessageBeep(MB_OK);
-
 	MSG msg;
 	// Main message loop:
 	while (GetMessage(&msg, nullptr, 0, 0))	{
@@ -104,21 +98,11 @@ int AppDelegate::run(HINSTANCE hInstance) {
 	return 0;
 }
 
-void AppDelegate::createMainDialog() {
-	if (mainDialog == NULL) {
-		mainDialog = new MainControlDialog(hInstance, IDD_DIALOG_MAIN);
-		mainDialog->show();
-	} else {
-		mainDialog->bringOnTop();
-	}
-}
+
 
 void AppDelegate::closeDialog(BaseDialog * dialog) {
 	dialog->closeDialog();
-	if (mainDialog == dialog) {
-		delete mainDialog;
-		mainDialog = NULL;
-	} else if (aboutDialog == dialog) {
+	if (aboutDialog == dialog) {
 		delete aboutDialog;
 		aboutDialog = NULL;
 	} else if (macroDialog == dialog) {
@@ -132,9 +116,6 @@ void AppDelegate::closeDialog(BaseDialog * dialog) {
 
 void AppDelegate::onInputMethodChangedFromHotKey() {
 	APP_SET_DATA(vLanguage, vLanguage);
-	if (mainDialog) {
-		mainDialog->fillData();
-	}
 	SystemTrayHelper::updateData();
 }
 
@@ -166,20 +147,14 @@ void AppDelegate::onDefaultConfig() {
 	APP_SET_DATA(vTempOffOpenKey, 0);
 	APP_SET_DATA(vFixChromiumBrowser, 0);
 
-	if (mainDialog) {
-		mainDialog->fillData();
-	}
 	SystemTrayHelper::updateData();
 }
 
 void AppDelegate::onToggleVietnamese() {
 	APP_SET_DATA(vLanguage, vLanguage ? 0 : 1);
-	if (mainDialog) {
-		mainDialog->fillData();
-	}
-	
+
 	if (vUseSmartSwitchKey) {
-		string& exe = OpenKeyHelper::getLastAppExecuteName();
+		string& exe = OpenKeyHelper::getFrontMostAppExecuteName();
 		setAppInputMethodStatus(exe, vLanguage | (vCodeTable << 1));
 		saveSmartSwitchKeyData();
 	}
@@ -187,23 +162,66 @@ void AppDelegate::onToggleVietnamese() {
 
 void AppDelegate::onToggleCheckSpelling() {
 	APP_SET_DATA(vCheckSpelling, 0);
-	if (mainDialog) {
-		mainDialog->fillData();
-	}
+
 	vSetCheckSpelling();
 }
 
 void AppDelegate::onToggleUseSmartSwitchKey() {
 	APP_SET_DATA(vUseSmartSwitchKey, 0);
-	if (mainDialog) {
-		mainDialog->fillData();
-	}
 }
 
 void AppDelegate::onToggleUseMacro() {
 	APP_SET_DATA(vUseMacro, 0);
-	if (mainDialog) {
-		mainDialog->fillData();
+}
+
+void AppDelegate::onSetSwitchKey(const unsigned int& keyStatus) {
+	APP_SET_DATA(vSwitchKeyStatus, keyStatus);
+}
+
+void AppDelegate::onToggleModernOrtho() {
+	APP_SET_DATA(vUseModernOrthography, vUseModernOrthography ? 0 : 1);
+}
+
+void AppDelegate::onToggleCapsFirst() {
+	APP_SET_DATA(vUpperCaseFirstChar, vUpperCaseFirstChar ? 0 : 1);
+}
+
+void AppDelegate::onToggleUseClipboard() {
+	APP_SET_DATA(vSendKeyStepByStep, vSendKeyStepByStep ? 0 : 1);
+}
+
+void AppDelegate::onToggleFixBrowser() {
+	APP_SET_DATA(vFixRecommendBrowser, vFixRecommendBrowser ? 0 : 1);
+	if (!vFixRecommendBrowser) {
+		APP_SET_DATA(vFixChromiumBrowser, 0); // Disable if parent disabled
+	}
+}
+
+void AppDelegate::onToggleFixChromium() {
+	APP_SET_DATA(vFixChromiumBrowser, vFixChromiumBrowser ? 0 : 1);
+	if (vFixChromiumBrowser) {
+		APP_SET_DATA(vFixRecommendBrowser, 1); // Enable parent
+	}
+}
+
+void AppDelegate::onToggleStartup() {
+	APP_SET_DATA(vRunWithWindows, vRunWithWindows ? 0 : 1);
+	OpenKeyHelper::registerRunOnStartup(vRunWithWindows);
+}
+
+void AppDelegate::onToggleMetro() {
+	APP_SET_DATA(vSupportMetroApp, vSupportMetroApp ? 0 : 1);
+}
+
+void AppDelegate::onToggleModernIcon() {
+	APP_SET_DATA(vUseGrayIcon, vUseGrayIcon ? 0 : 1);
+}
+
+void AppDelegate::onToggleBeep() {
+	if (vSwitchKeyStatus & 0x1000) {
+		APP_SET_DATA(vSwitchKeyStatus, vSwitchKeyStatus & ~0x1000);
+	} else {
+		APP_SET_DATA(vSwitchKeyStatus, vSwitchKeyStatus | 0x1000);
 	}
 }
 
@@ -238,25 +256,17 @@ void AppDelegate::onQuickConvert() {
 
 void AppDelegate::onInputType(const int & type) {
 	APP_SET_DATA(vInputType, type);
-	if (mainDialog) {
-		mainDialog->fillData();
-	}
 }
 
 void AppDelegate::onTableCode(const int & code) {
 	APP_SET_DATA(vCodeTable, code);
-	if (mainDialog) {
-		mainDialog->fillData();
-	}
 	if (vRememberCode) {
-		setAppInputMethodStatus(OpenKeyHelper::getFrontMostAppExecuteName(), vLanguage | (vCodeTable << 1));
+		string& exe = OpenKeyHelper::getFrontMostAppExecuteName();
+		setAppInputMethodStatus(exe, vLanguage | (vCodeTable << 1));
 		saveSmartSwitchKeyData();
 	}
 }
 
-void AppDelegate::onControlPanel() {
-	createMainDialog();
-}
 
 void AppDelegate::onOpenKeyAbout() {
 	if (aboutDialog == NULL) {

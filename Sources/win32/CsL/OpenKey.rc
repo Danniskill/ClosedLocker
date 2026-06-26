@@ -89,15 +89,15 @@ END
 
 IDD_ABOUTBOX DIALOGEX 0, 0, 210, 150
 STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | DS_CENTER | WS_POPUP | WS_CAPTION | WS_SYSMENU
-CAPTION "Thông tin CsL"
+CAPTION "Thông tin CsLite"
 FONT 9, "Segoe UI", 400, 0, 0x1
 BEGIN
     CONTROL         "",IDC_STATIC,"Static",SS_ETCHEDFRAME,7,7,196,50
     ICON            IDI_APP_ICON,IDC_STATIC,14,14,20,20
-    LTEXT           "CsL",IDC_STATIC_APP_TITLE,42,14,150,10,SS_NOPREFIX
+    LTEXT           "CsLite",IDC_STATIC_APP_TITLE,42,14,150,10,SS_NOPREFIX
     LTEXT           "Phiên bản",IDC_STATIC_APP_VERSION,42,30,150,8
     CONTROL         "",IDC_STATIC,"Static",SS_ETCHEDFRAME,7,63,196,55
-    CTEXT           "CsL - a fork version of OpenKey by",IDC_STATIC, 10, 67, 190, 8
+    CTEXT           "CsLite - a fork version of OpenKey by",IDC_STATIC, 10, 67, 190, 8
     CTEXT           "Mai Vu Tuyen",IDC_STATIC_AUTHOR1, 10, 77, 190, 8
     CTEXT           "Build by",IDC_STATIC, 10, 87, 190, 8
     CTEXT           "Danniskill and TrungTurbo",IDC_STATIC_AUTHOR2, 10, 97, 190, 8
@@ -107,7 +107,7 @@ END
 
 IDD_DIALOG_MAIN DIALOGEX 0, 0, 297, 250
 STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | DS_CENTER | WS_POPUP | WS_CAPTION | WS_SYSMENU
-CAPTION "CsL - Bộ gõ Tiếng Việt"
+CAPTION "CsLite - Bộ gõ Tiếng Việt"
 FONT 8, "MS Shell Dlg", 400, 0, 0x1
 BEGIN
     PUSHBUTTON      "Cài đặt gốc",ID_BTN_DEFAULT,108,223,81,20
@@ -127,7 +127,7 @@ BEGIN
     CONTROL         "Tiếng Việt",IDC_RADIO_METHOD_VIETNAMESE,"Button",BS_AUTORADIOBUTTON,64,59,47,10
     CONTROL         "Tiếng Anh",IDC_RADIO_METHOD_ENGLISH,"Button",BS_AUTORADIOBUTTON,158,59,48,10
     DEFPUSHBUTTON   "Đóng",IDBUTTON_OK,201,223,81,20
-    PUSHBUTTON      "Tắt CsL",IDBUTTON_EXIT,15,223,81,20
+    PUSHBUTTON      "Tắt CsLite",IDBUTTON_EXIT,15,223,81,20
     GROUPBOX        "Tùy chọn bộ gõ",IDC_STATIC,7,84,138,131
     CONTROL         "Đặt dấu oà, uý (thay vì òa, úy)",IDC_CHECK_MODERN_ORTHORGRAPHY,
                     "Button",BS_AUTOCHECKBOX | WS_TABSTOP,14,97,126,10
@@ -354,8 +354,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 2026,20,06,0
- PRODUCTVERSION 2026,20,06,0
+ FILEVERSION 2026,26,06,0
+ PRODUCTVERSION 2026,26,06,0
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -371,13 +371,13 @@ BEGIN
         BLOCK "040904b0"
         BEGIN
             VALUE "CompanyName", "Danniskill"
-            VALUE "FileDescription", "CsL - Bộ gõ Tiếng Việt nguồn mở"
-            VALUE "FileVersion", "2026.23.06.0"
-            VALUE "InternalName", "CsL.exe"
+            VALUE "FileDescription", "CsLite - Bộ gõ Tiếng Việt nguồn mở"
+            VALUE "FileVersion", "2026.26.06.0"
+            VALUE "InternalName", "CsLite.exe"
             VALUE "LegalCopyright", "Copyright (C) 2026 - Danniskill"
-            VALUE "OriginalFilename", "CsL.exe"
-            VALUE "ProductName", "CsL"
-            VALUE "ProductVersion", "2026.23.06.0"
+            VALUE "OriginalFilename", "CsLite.exe"
+            VALUE "ProductName", "CsLite"
+            VALUE "ProductVersion", "2026.26.06.0"
         END
     END
     BLOCK "VarFileInfo"
@@ -394,12 +394,12 @@ END
 
 STRINGTABLE
 BEGIN
-    IDS_APP_TITLE           "CsL"
+    IDS_APP_TITLE           "CsLite"
     IDS_TRAY_TITLE          "Bấm vào đây để bật gõ Tiếng Việt"
     IDS_TRAY_TITLE_2        "Bấm vào đây để tắt gõ Tiếng Việt"
     IDS_STRING_CONVERT_COMPLETED 
                             "Chuyển mã thành công!\nKết quả đã được lưu trong Clipboard!"
-    IDS_MAIN_DIALOG_TITLE   "CsL %s - Bộ gõ Tiếng Việt"
+    IDS_MAIN_DIALOG_TITLE   "CsLite %s - Bộ gõ Tiếng Việt"
     IDS_STRING_MODERN_ORTHORGRAPHY "Bor d"
     IDC_OPENKEY             "OPENKEY"
     IDS_STRING_MORDEN_ORTHORGRAPHY 
@@ -413,28 +413,20 @@ BEGIN
                             "Tính năng kiểm tra chính tả tương đối, hạn chế gõ sai từ, cải thiện việc gõ Tiếng Anh khi bật chế độ gõ Tiếng Việt"
     IDS_STRING_RESTORE_IF_WRONG_SPELLING 
                             "Từ nào sai Tiếng Việt thì tự động phục hồi lại những phím đã gõ"
-    IDS_STRING_USE_CLIPBOARD 
-                            "Nếu có ứng dụng nào không thể gõ Tiếng Việt, hãy bật tính năng này lên. Bình thường thì không nên dùng tính năng này."
-    IDS_STRING_ALLOW_ZWFJ   "Vẫn cho phép dùng các chữ z w f j làm phụ âm khi có bật tính năng kiểm tra chính tả"
-    IDS_STRING_TEMP_OFF_SPELLING 
-                            "Tạm tắt kiểm tra chính tả khi gõ một từ nào đó như từ Đắk Lắk, Krông,... Kiểm tra chính tả sẽ phục hồi trở lại cho từ tiếp theo"
-    IDS_STRING_MODERN_ICON  "Dùng biểu tượng đồng bộ với task bar của Windows 10"
-    IDS_STRING_CAPS_FIRST_CHAR 
-                            "Tự động viết hoa sau dấu chấm ngắt câu và sau khi xuống dòng"
     IDS_STRING_SMART_SWITCH_KEY 
-                            "Bạn đang sử dụng Chrome và dùng chế độ gõ Tiếng Việt, bạn chuyển qua Command Prompt và chuyển chế độ gõ qua Tiếng Anh, CsL sẽ tự ghi nhớ thao tác cho bạn, khi bạn chuyển về lại Chrome, CsL sẽ tự chuyển sang chế độ Tiếng Việt, sau đó nếu lại quay lại Command Prompt, CsL cũng sẽ tự đổi qua chế độ Tiếng Anh"
-    IDS_STRING_SUPPORT_METRO 
-                            "Hỗ trợ các ứng dụng Metro như Facebook Messenger, Instargram,..."
-    IDS_STRING_RUN_ON_STARTUP "Tự chạy CsL khi khởi động Windows"
-    IDS_STRING_SHOW_ON_STARTUP "Hiện bảng điều khiển mỗi lần chạy CsL"
+                            "Bạn đang sử dụng Chrome và dùng chế độ gõ Tiếng Việt, bạn chuyển qua Command Prompt và chuyển chế độ gõ qua Tiếng Anh, CsLite sẽ tự ghi nhớ thao tác cho bạn, khi bạn chuyển về lại Chrome, CsLite sẽ tự chuyển sang chế độ Tiếng Việt, sau đó nếu lại quay lại Command Prompt, CsLite cũng sẽ tự đổi qua chế độ Tiếng Anh"
+    IDS_STRING_USE_CLIPBOARD 
+                            "Chế độ an toàn: dành cho các ứng dụng có hệ thống anti-cheat bắt nhầm hoặc các IDE cũ (Sử dụng Clipboard để gửi phím, vì vậy tính năng Clipboard của Windows sẽ bị ảnh hưởng nếu bật chức năng này, đặc biệt là với Word/Excel/Powerpoint)"
+    IDS_STRING_RUN_ON_STARTUP "Tự chạy CsLite khi khởi động Windows"
+    IDS_STRING_SHOW_ON_STARTUP "Hiện bảng điều khiển mỗi lần chạy CsLite"
     IDS_STRING_CREATE_DESKTOP 
-                            "Tạo biểu tượng CsL ở Desktop để có thể tìm thấy nhanh khi cần thiết"
-    IDS_STRING_RUN_AS_ADMIN "Khởi động lại CsL với quyền Admin để có thể gõ được tiếng Việt trong game, bạn sẽ được yêu cầu khởi động lại chương trình CsL"
-    IDS_STRING_CHECK_UPDATE "Kiểm tra bản mới mỗi lần khởi động CsL"
+                            "Tạo biểu tượng CsLite ở Desktop để có thể tìm thấy nhanh khi cần thiết"
+    IDS_STRING_RUN_AS_ADMIN "Khởi động lại CsLite với quyền Admin để có thể gõ được tiếng Việt trong game, bạn sẽ được yêu cầu khởi động lại chương trình CsLite"
+    IDS_STRING_CHECK_UPDATE "Kiểm tra bản mới mỗi lần khởi động CsLite"
     IDS_STRING_REMEMBER_TABLE_CODE 
-                            "CsL sẽ tự động ghi nhớ bạn đã dùng bảng mã nào cho ứng dụng nào, để lần sau khi chuyển qua ứng dụng đó, CsL sẽ tự động chuyển sang bảng mã đó cho bạn. Rất thích hợp cho các ứng dụng kỹ thuật như Photoshop, CAD,..."
+                            "CsLite sẽ tự động ghi nhớ bạn đã dùng bảng mã nào cho ứng dụng nào, để lần sau khi chuyển qua ứng dụng đó, CsLite sẽ tự động chuyển sang bảng mã đó cho bạn. Rất thích hợp cho các ứng dụng kỹ thuật như Photoshop, CAD,..."
     IDS_STRING_TEMP_OFF_OPENKEY 
-                            "Bằng cách bấm phím Alt, CsL sẽ tạm ngừng hoạt động cho tới khi bạn gõ 1 từ mới."
+                            "Bằng cách bấm phím Alt, CsLite sẽ tạm ngừng hoạt động cho tới khi bạn gõ 1 từ mới."
 END
 
 STRINGTABLE

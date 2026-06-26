@@ -37,9 +37,41 @@ redistribute your new version, it MUST be open source.
 
 #define POPUP_MACRO_TABLE 990
 
-#define POPUP_CONTROL_PANEL 1000
-#define POPUP_ABOUT_OPENKEY 1010
+// Switch keys
+#define POPUP_SWITCH_CTRL_SHIFT 1101
+#define POPUP_SWITCH_ALT_Z 1102
+#define POPUP_SWITCH_CTRL_SPACE 1103
+#define POPUP_SWITCH_SHIFT_SPACE 1104
+
+// Typing Options
+#define POPUP_OPT_MODERN_ORTHO 1201
+#define POPUP_OPT_CAPS_FIRST 1202
+#define POPUP_OPT_USE_CLIPBOARD 1203
+#define POPUP_OPT_FIX_BROWSER 1204
+#define POPUP_OPT_FIX_CHROMIUM 1205
+
+// System
+#define POPUP_SYS_STARTUP 1301
+#define POPUP_SYS_METRO 1302
+#define POPUP_SYS_MODERN_ICON 1303
+#define POPUP_SYS_BEEP 1304
+
+#define POPUP_ABOUT_OPENKEY 2010
 #define POPUP_OPENKEY_EXIT 2000
+
+extern int vUseModernOrthography;
+extern int vUpperCaseFirstChar;
+extern int vFixRecommendBrowser;
+extern int vFixChromiumBrowser;
+extern int vSendKeyStepByStep;
+extern int vRunWithWindows;
+extern int vSupportMetroApp;
+extern int vUseGrayIcon;
+extern int vSwitchKeyStatus;
+extern int vLanguage;
+extern int vInputType;
+extern int vCodeTable;
+#include "../../engine/ConvertTool.h"
 
 #define MODIFY_MENU(MENU, COMMAND, DATA) ModifyMenu(MENU, COMMAND, \
 											MF_BYCOMMAND | (DATA ? MF_CHECKED : MF_UNCHECKED), \
@@ -47,7 +79,11 @@ redistribute your new version, it MUST be open source.
 											menuData[COMMAND]);
 
 static HMENU popupMenu;
-//static HMENU menuInputType;
+static HMENU menuInputType;
+static HMENU menuTableCode;
+static HMENU menuSwitchKey;
+static HMENU menuTypingOpt;
+static HMENU menuSystem;
 static HMENU otherCode;
 
 static NOTIFYICONDATA nid;
@@ -64,7 +100,24 @@ map<UINT, LPCTSTR> menuData = {
 	{POPUP_VN_LOCALE_1258, _T("Vietnamese locale CP 1258")},
 	{POPUP_CONVERT_TOOL, _T("Công cụ chuyển mã...")},
 	{POPUP_QUICK_CONVERT, _T("Chuyển mã nhanh")},
-	{POPUP_CONTROL_PANEL, _T("Bảng điều khiển...")},
+	{POPUP_MACRO_TABLE, _T("Bảng gõ tắt...")},
+
+	{POPUP_SWITCH_CTRL_SHIFT, _T("Ctrl + Shift")},
+	{POPUP_SWITCH_ALT_Z, _T("Alt + Z")},
+	{POPUP_SWITCH_CTRL_SPACE, _T("Ctrl + Space")},
+	{POPUP_SWITCH_SHIFT_SPACE, _T("Shift + Space")},
+
+	{POPUP_OPT_MODERN_ORTHO, _T("Đặt dấu oà, uý (thay vì òa, úy)")},
+	{POPUP_OPT_CAPS_FIRST, _T("Viết hoa chữ cái đầu tiên")},
+	{POPUP_OPT_USE_CLIPBOARD, _T("Sử dụng Clipboard để gửi phím")},
+	{POPUP_OPT_FIX_BROWSER, _T("Sửa lỗi gợi ý trên trình duyệt")},
+	{POPUP_OPT_FIX_CHROMIUM, _T("Sửa lỗi Chromium")},
+
+	{POPUP_SYS_STARTUP, _T("Khởi động cùng Windows")},
+	{POPUP_SYS_METRO, _T("Hỗ trợ ứng dụng Windows Store")},
+	{POPUP_SYS_MODERN_ICON, _T("Sử dụng biểu tượng hiện đại")},
+	{POPUP_SYS_BEEP, _T("Phát âm báo khi chuyển chế độ")},
+
 	{POPUP_ABOUT_OPENKEY, _T("Thông tin...")},
 	{POPUP_OPENKEY_EXIT, _T("Thoát")},
 };
@@ -72,11 +125,12 @@ map<UINT, LPCTSTR> menuData = {
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) {
 	switch (message) {
 	case WM_USER+2019:
-		AppDelegate::getInstance()->onControlPanel();
+		// do nothing
 		break;
 	case WM_TRAYMESSAGE: {
 		if (lParam == WM_LBUTTONDBLCLK) {
-			AppDelegate::getInstance()->onControlPanel();
+			AppDelegate::getInstance()->onToggleVietnamese();
+			SystemTrayHelper::updateData();
 		}
 		if (lParam == WM_LBUTTONUP) {
 			AppDelegate::getInstance()->onToggleVietnamese();
@@ -128,8 +182,47 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) 
 			case POPUP_VN_LOCALE_1258:
 				AppDelegate::getInstance()->onTableCode(4);
 				break;
-			case POPUP_CONTROL_PANEL:
-				AppDelegate::getInstance()->onControlPanel();
+			case POPUP_MACRO_TABLE:
+				AppDelegate::getInstance()->onMacroTable();
+				break;
+			case POPUP_SWITCH_CTRL_SHIFT:
+				AppDelegate::getInstance()->onSetSwitchKey((vSwitchKeyStatus & 0x0000FF00) | 0x5A000900 | 0xFE); // 0x5A is version/magic, 09 is Ctrl+Shift (1|8)
+				break;
+			case POPUP_SWITCH_ALT_Z:
+				AppDelegate::getInstance()->onSetSwitchKey((vSwitchKeyStatus & 0x0000FF00) | 0x5A000200 | 'Z'); // 02 is Alt
+				break;
+			case POPUP_SWITCH_CTRL_SPACE:
+				AppDelegate::getInstance()->onSetSwitchKey((vSwitchKeyStatus & 0x0000FF00) | 0x5A000100 | VK_SPACE); // 01 is Ctrl
+				break;
+			case POPUP_SWITCH_SHIFT_SPACE:
+				AppDelegate::getInstance()->onSetSwitchKey((vSwitchKeyStatus & 0x0000FF00) | 0x5A000800 | VK_SPACE); // 08 is Shift
+				break;
+			case POPUP_OPT_MODERN_ORTHO:
+				AppDelegate::getInstance()->onToggleModernOrtho();
+				break;
+			case POPUP_OPT_CAPS_FIRST:
+				AppDelegate::getInstance()->onToggleCapsFirst();
+				break;
+			case POPUP_OPT_USE_CLIPBOARD:
+				AppDelegate::getInstance()->onToggleUseClipboard();
+				break;
+			case POPUP_OPT_FIX_BROWSER:
+				AppDelegate::getInstance()->onToggleFixBrowser();
+				break;
+			case POPUP_OPT_FIX_CHROMIUM:
+				AppDelegate::getInstance()->onToggleFixChromium();
+				break;
+			case POPUP_SYS_STARTUP:
+				AppDelegate::getInstance()->onToggleStartup();
+				break;
+			case POPUP_SYS_METRO:
+				AppDelegate::getInstance()->onToggleMetro();
+				break;
+			case POPUP_SYS_MODERN_ICON:
+				AppDelegate::getInstance()->onToggleModernIcon();
+				break;
+			case POPUP_SYS_BEEP:
+				AppDelegate::getInstance()->onToggleBeep();
 				break;
 			case POPUP_ABOUT_OPENKEY:
 				AppDelegate::getInstance()->onOpenKeyAbout();
@@ -176,37 +269,62 @@ HWND SystemTrayHelper::createFakeWindow(const HINSTANCE & hIns) {
 
 void SystemTrayHelper::createPopupMenu() {
 	popupMenu = CreatePopupMenu();
+	
 	AppendMenu(popupMenu, MF_CHECKED, POPUP_VIET_ON_OFF, menuData[POPUP_VIET_ON_OFF]);
 	AppendMenu(popupMenu, MF_SEPARATOR, 0, 0);
-	AppendMenu(popupMenu, MF_UNCHECKED, POPUP_CONVERT_TOOL, menuData[POPUP_CONVERT_TOOL]);
-	AppendMenu(popupMenu, MF_UNCHECKED, POPUP_QUICK_CONVERT, menuData[POPUP_QUICK_CONVERT]);
-	AppendMenu(popupMenu, MF_SEPARATOR, 0, 0);
 
-	//menuInputType = CreatePopupMenu();
-	AppendMenu(popupMenu, MF_CHECKED, POPUP_TELEX, menuData[POPUP_TELEX]);
-	AppendMenu(popupMenu, MF_CHECKED, POPUP_VNI, menuData[POPUP_VNI]);
-	AppendMenu(popupMenu, MF_CHECKED, POPUP_SIMPLE_TELEX, menuData[POPUP_SIMPLE_TELEX]);
+	// Kiểu gõ
+	menuInputType = CreatePopupMenu();
+	AppendMenu(menuInputType, MF_CHECKED, POPUP_TELEX, menuData[POPUP_TELEX]);
+	AppendMenu(menuInputType, MF_CHECKED, POPUP_VNI, menuData[POPUP_VNI]);
+	AppendMenu(menuInputType, MF_CHECKED, POPUP_SIMPLE_TELEX, menuData[POPUP_SIMPLE_TELEX]);
+	AppendMenu(popupMenu, MF_POPUP, (UINT_PTR)menuInputType, _T("Kiểu gõ"));
 
-	//AppendMenu(popupMenu, MF_POPUP, (UINT_PTR)menuInputType, _T("Kiểu gõ"));
-	AppendMenu(popupMenu, MF_SEPARATOR, 0, 0);
-
-	AppendMenu(popupMenu, MF_UNCHECKED, POPUP_UNICODE, menuData[POPUP_UNICODE]);
-	AppendMenu(popupMenu, MF_UNCHECKED, POPUP_TCVN3, menuData[POPUP_TCVN3]);
-	AppendMenu(popupMenu, MF_UNCHECKED, POPUP_VNI_WINDOWS, menuData[POPUP_VNI_WINDOWS]);
-
+	// Bảng mã
+	menuTableCode = CreatePopupMenu();
+	AppendMenu(menuTableCode, MF_UNCHECKED, POPUP_UNICODE, menuData[POPUP_UNICODE]);
+	AppendMenu(menuTableCode, MF_UNCHECKED, POPUP_TCVN3, menuData[POPUP_TCVN3]);
+	AppendMenu(menuTableCode, MF_UNCHECKED, POPUP_VNI_WINDOWS, menuData[POPUP_VNI_WINDOWS]);
 	otherCode = CreatePopupMenu();
 	AppendMenu(otherCode, MF_CHECKED, POPUP_UNICODE_COMPOUND, menuData[POPUP_UNICODE_COMPOUND]);
 	AppendMenu(otherCode, MF_CHECKED, POPUP_VN_LOCALE_1258, menuData[POPUP_VN_LOCALE_1258]);
-	AppendMenu(popupMenu, MF_POPUP, (UINT_PTR)otherCode, _T("Bảng mã khác"));
+	AppendMenu(menuTableCode, MF_POPUP, (UINT_PTR)otherCode, _T("Bảng mã khác"));
+	AppendMenu(popupMenu, MF_POPUP, (UINT_PTR)menuTableCode, _T("Bảng mã"));
+
+	// Phím chuyển ngữ
+	menuSwitchKey = CreatePopupMenu();
+	AppendMenu(menuSwitchKey, MF_UNCHECKED, POPUP_SWITCH_CTRL_SHIFT, menuData[POPUP_SWITCH_CTRL_SHIFT]);
+	AppendMenu(menuSwitchKey, MF_UNCHECKED, POPUP_SWITCH_ALT_Z, menuData[POPUP_SWITCH_ALT_Z]);
+	AppendMenu(menuSwitchKey, MF_UNCHECKED, POPUP_SWITCH_CTRL_SPACE, menuData[POPUP_SWITCH_CTRL_SPACE]);
+	AppendMenu(menuSwitchKey, MF_UNCHECKED, POPUP_SWITCH_SHIFT_SPACE, menuData[POPUP_SWITCH_SHIFT_SPACE]);
+	AppendMenu(popupMenu, MF_POPUP, (UINT_PTR)menuSwitchKey, _T("Phím chuyển ngữ"));
+
+	// Tùy chọn gõ
+	menuTypingOpt = CreatePopupMenu();
+	AppendMenu(menuTypingOpt, MF_UNCHECKED, POPUP_OPT_MODERN_ORTHO, menuData[POPUP_OPT_MODERN_ORTHO]);
+	AppendMenu(menuTypingOpt, MF_UNCHECKED, POPUP_OPT_CAPS_FIRST, menuData[POPUP_OPT_CAPS_FIRST]);
+	AppendMenu(menuTypingOpt, MF_UNCHECKED, POPUP_OPT_USE_CLIPBOARD, menuData[POPUP_OPT_USE_CLIPBOARD]);
+	AppendMenu(menuTypingOpt, MF_UNCHECKED, POPUP_OPT_FIX_BROWSER, menuData[POPUP_OPT_FIX_BROWSER]);
+	AppendMenu(menuTypingOpt, MF_UNCHECKED, POPUP_OPT_FIX_CHROMIUM, menuData[POPUP_OPT_FIX_CHROMIUM]);
+	AppendMenu(popupMenu, MF_POPUP, (UINT_PTR)menuTypingOpt, _T("Tùy chọn gõ"));
+
+	// Hệ thống
+	menuSystem = CreatePopupMenu();
+	AppendMenu(menuSystem, MF_UNCHECKED, POPUP_SYS_STARTUP, menuData[POPUP_SYS_STARTUP]);
+	AppendMenu(menuSystem, MF_UNCHECKED, POPUP_SYS_METRO, menuData[POPUP_SYS_METRO]);
+	AppendMenu(menuSystem, MF_UNCHECKED, POPUP_SYS_MODERN_ICON, menuData[POPUP_SYS_MODERN_ICON]);
+	AppendMenu(menuSystem, MF_UNCHECKED, POPUP_SYS_BEEP, menuData[POPUP_SYS_BEEP]);
+	AppendMenu(popupMenu, MF_POPUP, (UINT_PTR)menuSystem, _T("Hệ thống"));
 
 	AppendMenu(popupMenu, MF_SEPARATOR, 0, 0);
 
-	AppendMenu(popupMenu, MF_STRING, POPUP_CONTROL_PANEL, menuData[POPUP_CONTROL_PANEL]);
+	AppendMenu(popupMenu, MF_STRING, POPUP_MACRO_TABLE, menuData[POPUP_MACRO_TABLE]);
+	AppendMenu(popupMenu, MF_STRING, POPUP_CONVERT_TOOL, menuData[POPUP_CONVERT_TOOL]);
 	AppendMenu(popupMenu, MF_STRING, POPUP_ABOUT_OPENKEY, menuData[POPUP_ABOUT_OPENKEY]);
 	AppendMenu(popupMenu, MF_SEPARATOR, 0, 0);
 	AppendMenu(popupMenu, MF_UNCHECKED, POPUP_OPENKEY_EXIT, menuData[POPUP_OPENKEY_EXIT]);
 
-	SetMenuDefaultItem(popupMenu, POPUP_CONTROL_PANEL, false);
+	SetMenuDefaultItem(popupMenu, POPUP_VIET_ON_OFF, false);
 }
 
 static void loadTrayIcon() {
@@ -227,14 +345,42 @@ void SystemTrayHelper::updateData() {
 	Shell_NotifyIcon(NIM_MODIFY, &nid);
 
 	MODIFY_MENU(popupMenu, POPUP_VIET_ON_OFF, vLanguage);
-	MODIFY_MENU(popupMenu, POPUP_TELEX, vInputType == 0);
-	MODIFY_MENU(popupMenu, POPUP_VNI, vInputType == 1);
-	MODIFY_MENU(popupMenu, POPUP_SIMPLE_TELEX, vInputType == 2);
-	MODIFY_MENU(popupMenu, POPUP_UNICODE, vCodeTable == 0);
-	MODIFY_MENU(popupMenu, POPUP_TCVN3, vCodeTable == 1);
-	MODIFY_MENU(popupMenu, POPUP_VNI_WINDOWS, vCodeTable == 2);
+
+	MODIFY_MENU(menuInputType, POPUP_TELEX, vInputType == 0);
+	MODIFY_MENU(menuInputType, POPUP_VNI, vInputType == 1);
+	MODIFY_MENU(menuInputType, POPUP_SIMPLE_TELEX, vInputType == 2);
+
+	MODIFY_MENU(menuTableCode, POPUP_UNICODE, vCodeTable == 0);
+	MODIFY_MENU(menuTableCode, POPUP_TCVN3, vCodeTable == 1);
+	MODIFY_MENU(menuTableCode, POPUP_VNI_WINDOWS, vCodeTable == 2);
 	MODIFY_MENU(otherCode, POPUP_UNICODE_COMPOUND, vCodeTable == 3);
 	MODIFY_MENU(otherCode, POPUP_VN_LOCALE_1258, vCodeTable == 4);
+
+	bool isCtrlShift = (vSwitchKeyStatus & 0xFFFFFF00) == 0x5A000900; // Ctrl + Shift + NoKey?
+	// Wait, we need a better way to represent shortcut keys.
+	// For now let's just check standard masks.
+	bool hasCtrl = (vSwitchKeyStatus & 0x100) != 0;
+	bool hasAlt = (vSwitchKeyStatus & 0x200) != 0;
+	bool hasWin = (vSwitchKeyStatus & 0x400) != 0;
+	bool hasShift = (vSwitchKeyStatus & 0x800) != 0;
+	unsigned short key = ((vSwitchKeyStatus >> 24) & 0xFF);
+
+	MODIFY_MENU(menuSwitchKey, POPUP_SWITCH_CTRL_SHIFT, hasCtrl && hasShift && !hasAlt && !hasWin && key == 0xFE);
+	MODIFY_MENU(menuSwitchKey, POPUP_SWITCH_ALT_Z, hasAlt && !hasCtrl && !hasShift && !hasWin && key == 'Z');
+	MODIFY_MENU(menuSwitchKey, POPUP_SWITCH_CTRL_SPACE, hasCtrl && !hasShift && !hasAlt && !hasWin && key == VK_SPACE);
+	MODIFY_MENU(menuSwitchKey, POPUP_SWITCH_SHIFT_SPACE, hasShift && !hasCtrl && !hasAlt && !hasWin && key == VK_SPACE);
+
+	MODIFY_MENU(menuTypingOpt, POPUP_OPT_MODERN_ORTHO, vUseModernOrthography);
+	MODIFY_MENU(menuTypingOpt, POPUP_OPT_CAPS_FIRST, vUpperCaseFirstChar);
+	MODIFY_MENU(menuTypingOpt, POPUP_OPT_USE_CLIPBOARD, vSendKeyStepByStep == 0);
+	MODIFY_MENU(menuTypingOpt, POPUP_OPT_FIX_BROWSER, vFixRecommendBrowser);
+	MODIFY_MENU(menuTypingOpt, POPUP_OPT_FIX_CHROMIUM, vFixChromiumBrowser);
+
+	MODIFY_MENU(menuSystem, POPUP_SYS_STARTUP, vRunWithWindows);
+	MODIFY_MENU(menuSystem, POPUP_SYS_METRO, vSupportMetroApp);
+	MODIFY_MENU(menuSystem, POPUP_SYS_MODERN_ICON, vUseGrayIcon);
+	bool hasBeep = (vSwitchKeyStatus & 0x1000) != 0;
+	MODIFY_MENU(menuSystem, POPUP_SYS_BEEP, hasBeep);
 
 	wstring hotkey = L"";
 	bool hasAdd = false;

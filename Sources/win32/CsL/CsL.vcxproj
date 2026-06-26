@@ -72,19 +72,19 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <TargetName>CsL32</TargetName>
+    <TargetName>CsLite32</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <TargetName>CsL</TargetName>
+    <TargetName>CsLite</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
-    <TargetName>CsL32</TargetName>
+    <TargetName>CsLite32</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <TargetName>CsL</TargetName>
+    <TargetName>CsLite</TargetName>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -174,7 +174,7 @@
     <ClInclude Include="BaseDialog.h" />
     <ClInclude Include="ConvertToolDialog.h" />
     <ClInclude Include="MacroDialog.h" />
-    <ClInclude Include="MainControlDialog.h" />
+
     <ClInclude Include="OpenKeyHelper.h" />
     <ClInclude Include="OpenKeyManager.h" />
     <ClInclude Include="Resource.h" />
@@ -194,7 +194,7 @@
     <ClCompile Include="ConvertToolDialog.cpp" />
     <ClCompile Include="MacroDialog.cpp" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="MainControlDialog.cpp" />
+
     <ClCompile Include="OpenKey.cpp" />
     <ClCompile Include="OpenKeyHelper.cpp" />
     <ClCompile Include="OpenKeyManager.cpp" />

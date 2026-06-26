@@ -137,8 +137,8 @@ string& OpenKeyHelper::getFrontMostAppExecuteName() {
 		return _unknownProgram;
 	}
 	_exeName = _tcsrchr(_exePath, '\\') + 1;
-	if (wcscmp(_exeName, _T("CsL.exe")) == 0 ||
-		wcscmp(_exeName, _T("CsL32.exe")) == 0 || 
+	if (wcscmp(_exeName, _T("CsLite.exe")) == 0 ||
+		wcscmp(_exeName, _T("CsLite32.exe")) == 0 || 
 		wcscmp(_exeName, _T("explorer.exe")) == 0) {
 		return _exeNameUtf8;
 	}
@@ -294,7 +294,7 @@ DWORD OpenKeyHelper::getVersionNumber() {
 }
 
 wstring OpenKeyHelper::getVersionString() {
-	return wstring(_T("2026.23.06"));
+	return wstring(_T("2026.26.06"));
 
 	// get the filename of the executable containing the version resource
 	TCHAR szFilename[MAX_PATH + 1] = { 0 };

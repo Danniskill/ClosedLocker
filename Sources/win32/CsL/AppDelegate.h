@@ -13,7 +13,6 @@ redistribute your new version, it MUST be open source.
 -----------------------------------------------------------*/
 #pragma once
 #include "stdafx.h"
-#include "MainControlDialog.h"
 #include "AboutDialog.h"
 #include "ConvertToolDialog.h"
 #include "MacroDialog.h"
@@ -22,14 +21,13 @@ class BaseDialog;
 class AppDelegate {
 private:
 	HINSTANCE hInstance;
-	BaseDialog* mainDialog = NULL, *aboutDialog = NULL, *macroDialog = NULL, *convertDialog = NULL;
+	BaseDialog* aboutDialog = NULL, *macroDialog = NULL, *convertDialog = NULL;
 private:
 	bool isDialogMsg(MSG &msg) const;
 public:
 	AppDelegate();
 	static AppDelegate* getInstance();
 	int run(HINSTANCE hInstance);
-	void createMainDialog();
 	void closeDialog(BaseDialog* dialog);
 public: //event
 	void onInputMethodChangedFromHotKey();
@@ -39,6 +37,19 @@ public: //event
 	void onToggleCheckSpelling();
 	void onToggleUseSmartSwitchKey();
 	void onToggleUseMacro();
+	
+	// New menu toggles
+	void onSetSwitchKey(const unsigned int& keyStatus);
+	void onToggleModernOrtho();
+	void onToggleCapsFirst();
+	void onToggleUseClipboard();
+	void onToggleFixBrowser();
+	void onToggleFixChromium();
+	
+	void onToggleStartup();
+	void onToggleMetro();
+	void onToggleModernIcon();
+	void onToggleBeep();
 
 	void onMacroTable();
 	void onConvertTool();
@@ -47,7 +58,6 @@ public: //event
 	void onInputType(const int& type);
 	void onTableCode(const int& code);
 
-	void onControlPanel();
 	void onOpenKeyAbout();
 	void onOpenKeyExit();
 };

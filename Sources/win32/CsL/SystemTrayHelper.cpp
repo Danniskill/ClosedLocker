@@ -42,6 +42,8 @@ redistribute your new version, it MUST be open source.
 #define POPUP_SWITCH_ALT_Z 1102
 #define POPUP_SWITCH_CTRL_SPACE 1103
 #define POPUP_SWITCH_SHIFT_SPACE 1104
+#define POPUP_SWITCH_WIN_SPACE 1105
+#define POPUP_SWITCH_ALT_SPACE 1106
 
 // Typing Options
 #define POPUP_OPT_MODERN_ORTHO 1201
@@ -106,6 +108,8 @@ map<UINT, LPCTSTR> menuData = {
 	{POPUP_SWITCH_ALT_Z, _T("Alt + Z")},
 	{POPUP_SWITCH_CTRL_SPACE, _T("Ctrl + Space")},
 	{POPUP_SWITCH_SHIFT_SPACE, _T("Shift + Space")},
+	{POPUP_SWITCH_WIN_SPACE, _T("Win + Space")},
+	{POPUP_SWITCH_ALT_SPACE, _T("Alt + Space")},
 
 	{POPUP_OPT_MODERN_ORTHO, _T("Đặt dấu oà, uý (thay vì òa, úy)")},
 	{POPUP_OPT_CAPS_FIRST, _T("Viết hoa chữ cái đầu tiên")},
@@ -197,6 +201,12 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) 
 			case POPUP_SWITCH_SHIFT_SPACE:
 				AppDelegate::getInstance()->onSetSwitchKey((vSwitchKeyStatus & 0x0000FF00) | 0x5A000800 | VK_SPACE); // 08 is Shift
 				break;
+			case POPUP_SWITCH_WIN_SPACE:
+				AppDelegate::getInstance()->onSetSwitchKey((vSwitchKeyStatus & 0x0000FF00) | 0x5A000400 | VK_SPACE); // 04 is Win
+				break;
+			case POPUP_SWITCH_ALT_SPACE:
+				AppDelegate::getInstance()->onSetSwitchKey((vSwitchKeyStatus & 0x0000FF00) | 0x5A000200 | VK_SPACE); // 02 is Alt
+				break;
 			case POPUP_OPT_MODERN_ORTHO:
 				AppDelegate::getInstance()->onToggleModernOrtho();
 				break;
@@ -232,6 +242,16 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) 
 				break;
 			}
 			SystemTrayHelper::updateData();
+
+			bool keepMenuOpen = (commandId != 0 && 
+								 commandId != POPUP_ABOUT_OPENKEY && 
+								 commandId != POPUP_OPENKEY_EXIT && 
+								 commandId != POPUP_MACRO_TABLE && 
+								 commandId != POPUP_CONVERT_TOOL && 
+								 commandId != POPUP_QUICK_CONVERT);
+			if (keepMenuOpen) {
+				PostMessage(hWnd, WM_TRAYMESSAGE, 0, WM_RBUTTONDOWN);
+			}
 		}
 	}
 	break;
@@ -297,6 +317,8 @@ void SystemTrayHelper::createPopupMenu() {
 	AppendMenu(menuSwitchKey, MF_UNCHECKED, POPUP_SWITCH_ALT_Z, menuData[POPUP_SWITCH_ALT_Z]);
 	AppendMenu(menuSwitchKey, MF_UNCHECKED, POPUP_SWITCH_CTRL_SPACE, menuData[POPUP_SWITCH_CTRL_SPACE]);
 	AppendMenu(menuSwitchKey, MF_UNCHECKED, POPUP_SWITCH_SHIFT_SPACE, menuData[POPUP_SWITCH_SHIFT_SPACE]);
+	AppendMenu(menuSwitchKey, MF_UNCHECKED, POPUP_SWITCH_WIN_SPACE, menuData[POPUP_SWITCH_WIN_SPACE]);
+	AppendMenu(menuSwitchKey, MF_UNCHECKED, POPUP_SWITCH_ALT_SPACE, menuData[POPUP_SWITCH_ALT_SPACE]);
 	AppendMenu(popupMenu, MF_POPUP, (UINT_PTR)menuSwitchKey, _T("Phím chuyển ngữ"));
 
 	// Tùy chọn gõ
@@ -363,12 +385,14 @@ void SystemTrayHelper::updateData() {
 	bool hasAlt = (vSwitchKeyStatus & 0x200) != 0;
 	bool hasWin = (vSwitchKeyStatus & 0x400) != 0;
 	bool hasShift = (vSwitchKeyStatus & 0x800) != 0;
-	unsigned short key = ((vSwitchKeyStatus >> 24) & 0xFF);
+	unsigned short key = (vSwitchKeyStatus & 0xFF);
 
 	MODIFY_MENU(menuSwitchKey, POPUP_SWITCH_CTRL_SHIFT, hasCtrl && hasShift && !hasAlt && !hasWin && key == 0xFE);
 	MODIFY_MENU(menuSwitchKey, POPUP_SWITCH_ALT_Z, hasAlt && !hasCtrl && !hasShift && !hasWin && key == 'Z');
 	MODIFY_MENU(menuSwitchKey, POPUP_SWITCH_CTRL_SPACE, hasCtrl && !hasShift && !hasAlt && !hasWin && key == VK_SPACE);
 	MODIFY_MENU(menuSwitchKey, POPUP_SWITCH_SHIFT_SPACE, hasShift && !hasCtrl && !hasAlt && !hasWin && key == VK_SPACE);
+	MODIFY_MENU(menuSwitchKey, POPUP_SWITCH_WIN_SPACE, hasWin && !hasCtrl && !hasShift && !hasAlt && key == VK_SPACE);
+	MODIFY_MENU(menuSwitchKey, POPUP_SWITCH_ALT_SPACE, hasAlt && !hasCtrl && !hasShift && !hasWin && key == VK_SPACE);
 
 	MODIFY_MENU(menuTypingOpt, POPUP_OPT_MODERN_ORTHO, vUseModernOrthography);
 	MODIFY_MENU(menuTypingOpt, POPUP_OPT_CAPS_FIRST, vUpperCaseFirstChar);

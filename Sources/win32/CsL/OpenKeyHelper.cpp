@@ -23,7 +23,6 @@ redistribute your new version, it MUST be open source.
 static BYTE* _regData = 0;
 
 static LPCTSTR sk = TEXT("SOFTWARE\\Chunk\\CsL");
-static HKEY hKey;
 static LPCTSTR _runOnStartupKeyPath = _T("Software\\Microsoft\\Windows\\CurrentVersion\\Run");
 static TCHAR _executePath[MAX_PATH];
 static bool _hasGetPath = false;
@@ -36,28 +35,30 @@ static HANDLE _proc;
 static string _exeNameUtf8 = "TheCsLProject";
 static string _unknownProgram = "UnknownProgram";
 
-int CF_RTF = RegisterClipboardFormat(_T("Rich Text Format"));
-int CF_HTML = RegisterClipboardFormat(_T("HTML Format"));
-int CF_OPENKEY = RegisterClipboardFormat(_T("CsL Format"));
+UINT CF_RTF = RegisterClipboardFormat(_T("Rich Text Format"));
+UINT CF_HTML = RegisterClipboardFormat(_T("HTML Format"));
+UINT CF_OPENKEY = RegisterClipboardFormat(_T("CsL Format"));
 
-void OpenKeyHelper::openKey() {
+HKEY OpenKeyHelper::openKey() {
+	HKEY hKey;
 	LONG nError = RegOpenKeyEx(HKEY_CURRENT_USER, sk, NULL, KEY_ALL_ACCESS, &hKey);
 	if (nError == ERROR_FILE_NOT_FOUND) 	{
-		nError = RegCreateKeyEx(HKEY_CURRENT_USER, sk, NULL, NULL, REG_OPTION_NON_VOLATILE, KEY_CREATE_SUB_KEY, NULL, &hKey, NULL);
+		nError = RegCreateKeyEx(HKEY_CURRENT_USER, sk, NULL, NULL, REG_OPTION_NON_VOLATILE, KEY_ALL_ACCESS, NULL, &hKey, NULL);
 	}
 	if (nError) {
 		LOG(L"result %d\n", nError);
 	}
+	return hKey;
 }
 
 void OpenKeyHelper::setRegInt(LPCTSTR key, const int & val) {
-	openKey();
+	HKEY hKey = openKey();
 	RegSetValueEx(hKey, key, 0, REG_DWORD, (LPBYTE)&val, sizeof(val));
 	RegCloseKey(hKey);
 }
 
 int OpenKeyHelper::getRegInt(LPCTSTR key, const int & defaultValue) {
-	openKey();
+	HKEY hKey = openKey();
 	int val = defaultValue;
 	DWORD size = sizeof(val);
 	if (ERROR_SUCCESS != RegQueryValueEx(hKey, key, 0, 0, (LPBYTE)&val, &size)) {
@@ -68,23 +69,26 @@ int OpenKeyHelper::getRegInt(LPCTSTR key, const int & defaultValue) {
 }
 
 void OpenKeyHelper::setRegBinary(LPCTSTR key, const BYTE * pData, const int & size) {
-	openKey();
+	HKEY hKey = openKey();
 	RegSetValueEx(hKey, key, 0, REG_BINARY, pData, size);
 	RegCloseKey(hKey);
 }
 
 BYTE * OpenKeyHelper::getRegBinary(LPCTSTR key, DWORD& outSize) {
-	openKey();
+	HKEY hKey = openKey();
 	if (_regData) {
 		delete[] _regData;
 		_regData = NULL;
 	}
 	DWORD size = 0;
 	RegQueryValueEx(hKey, key, 0, 0, 0, &size);
-	_regData = new BYTE[size];
-	if (ERROR_SUCCESS != RegQueryValueEx(hKey, key, 0, 0, _regData, &size)) {
-		delete[] _regData;
-		_regData = NULL;
+	if (size > 0) {
+		_regData = new BYTE[size];
+		if (ERROR_SUCCESS != RegQueryValueEx(hKey, key, 0, 0, _regData, &size)) {
+			delete[] _regData;
+			_regData = NULL;
+			size = 0;
+		}
 	}
 	outSize = size;
 	RegCloseKey(hKey);
@@ -99,6 +103,7 @@ void OpenKeyHelper::registerRunOnStartup(const int& val) {
 			sprintf_s(buff, "schtasks /create /sc onlogon /tn CsL /rl highest /tr \"%s\" /f", path.c_str());
 			WinExec(buff, SW_HIDE);
 		} else {
+			HKEY hKey;
 			RegOpenKeyEx(HKEY_CURRENT_USER, _runOnStartupKeyPath, NULL, KEY_ALL_ACCESS, &hKey);
 			wstring path = getFullPath();
 			RegSetValueEx(hKey, _T("CsL"), 0, REG_SZ, (byte*)path.c_str(), ((DWORD)path.size() + 1) * sizeof(TCHAR));
@@ -106,6 +111,7 @@ void OpenKeyHelper::registerRunOnStartup(const int& val) {
 		}
 	}
 	else {
+		HKEY hKey;
 		RegOpenKeyEx(HKEY_CURRENT_USER, _runOnStartupKeyPath, NULL, KEY_ALL_ACCESS, &hKey);
 		RegDeleteValue(hKey, _T("CsL"));
 		RegCloseKey(hKey);
@@ -130,13 +136,18 @@ string& OpenKeyHelper::getFrontMostAppExecuteName() {
 	}
 	_cacheProcessId = _tempProcessId;
 	_proc = OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ, FALSE, _tempProcessId);
-	GetProcessImageFileName((HMODULE)_proc, _exePath, 1024);
-	CloseHandle(_proc);
+	if (_proc) {
+		GetProcessImageFileName((HANDLE)_proc, _exePath, 1024);
+		CloseHandle(_proc);
+	} else {
+		_exePath[0] = 0;
+	}
 	
 	if (wcscmp(_exePath, _T("")) == 0) {
 		return _unknownProgram;
 	}
-	_exeName = _tcsrchr(_exePath, '\\') + 1;
+	LPCTSTR slash = _tcsrchr(_exePath, '\\');
+	_exeName = slash ? slash + 1 : _exePath;
 	if (wcscmp(_exeName, _T("CsLite.exe")) == 0 ||
 		wcscmp(_exeName, _T("CsLite32.exe")) == 0 || 
 		wcscmp(_exeName, _T("explorer.exe")) == 0) {
@@ -173,12 +184,14 @@ wstring OpenKeyHelper::getClipboardText(const int& type) {
 	// Get handle of clipboard object for ANSI text
 	HANDLE hData = GetClipboardData(type);
 	if (hData == nullptr) {
+		CloseClipboard();
 		return _T("");
 	}
 
 	// Lock the handle to get the actual text pointer
 	wchar_t * pszText = static_cast<wchar_t*>(GlobalLock(hData));
 	if (pszText == nullptr) {
+		CloseClipboard();
 		return _T("");
 	}
 
@@ -198,7 +211,10 @@ void OpenKeyHelper::setClipboardText(LPCTSTR data, const int & len, const int& t
 	HGLOBAL hMem = GlobalAlloc(GMEM_MOVEABLE, len * sizeof(WCHAR));
 	memcpy(GlobalLock(hMem), data, len * sizeof(WCHAR));
 	GlobalUnlock(hMem);
-	OpenClipboard(0);
+	if (!OpenClipboard(0)) {
+		GlobalFree(hMem);
+		return;
+	}
 	EmptyClipboard();
 	SetClipboardData(type, hMem);
 	CloseClipboard();
@@ -215,32 +231,34 @@ bool OpenKeyHelper::quickConvert() {
 	string dataHTML, dataRTF;
 	wstring dataUnicode;
 
-	char* pHTML = 0, pRTF = 0;
+	char* pHTML = 0, *pRTF = 0;
 	wchar_t* pUnicode = 0;
 
 	//HTML
 	HANDLE hData = GetClipboardData(CF_HTML);
 	if (hData) {
 		pHTML = static_cast<char*>(GlobalLock(hData));
-		GlobalUnlock(hData);
-	}
-	if (pHTML) {
-		dataHTML = pHTML;
-		dataHTML = convertUtil(dataHTML);
+		if (pHTML) {
+			dataHTML = pHTML;
+			dataHTML = convertUtil(dataHTML);
+			GlobalUnlock(hData);
+		}
 	}
 
 	//UNICODE
 	hData = GetClipboardData(CF_UNICODETEXT);
 	if (hData) {
 		pUnicode = static_cast<wchar_t*>(GlobalLock(hData));
-		GlobalUnlock(hData);
-	}
-	if (pUnicode) {
-		dataUnicode = pUnicode;
-		dataUnicode = utf8ToWideString(convertUtil(wideStringToUtf8(dataUnicode)));
+		if (pUnicode) {
+			dataUnicode = pUnicode;
+			dataUnicode = utf8ToWideString(convertUtil(wideStringToUtf8(dataUnicode)));
+			GlobalUnlock(hData);
+		}
 	}
 
-	OpenClipboard(0);
+	CloseClipboard();
+
+	if (!OpenClipboard(0)) return false;
 	EmptyClipboard();
 
 	HGLOBAL hMem = GlobalAlloc(GMEM_MOVEABLE, (int)(dataHTML.size() + 1) * sizeof(char));
@@ -295,12 +313,6 @@ DWORD OpenKeyHelper::getVersionNumber() {
 
 wstring OpenKeyHelper::getVersionString() {
 	return wstring(_T("2026.26.06"));
-
-	// get the filename of the executable containing the version resource
-	TCHAR szFilename[MAX_PATH + 1] = { 0 };
-	if (GetModuleFileName(NULL, szFilename, MAX_PATH) == 0) { 
-		return _T("");
-	}
 }
 
 wstring OpenKeyHelper::getContentOfUrl(LPCTSTR url){

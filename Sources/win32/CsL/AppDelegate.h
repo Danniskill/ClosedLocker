@@ -13,22 +13,14 @@ redistribute your new version, it MUST be open source.
 -----------------------------------------------------------*/
 #pragma once
 #include "stdafx.h"
-#include "AboutDialog.h"
-#include "ConvertToolDialog.h"
-#include "MacroDialog.h"
-
-class BaseDialog;
 class AppDelegate {
 private:
 	HINSTANCE hInstance;
-	BaseDialog* aboutDialog = NULL, *macroDialog = NULL, *convertDialog = NULL;
 private:
-	bool isDialogMsg(MSG &msg) const;
 public:
 	AppDelegate();
 	static AppDelegate* getInstance();
 	int run(HINSTANCE hInstance);
-	void closeDialog(BaseDialog* dialog);
 public: //event
 	void onInputMethodChangedFromHotKey();
 	void onDefaultConfig();
@@ -51,13 +43,10 @@ public: //event
 	void onToggleModernIcon();
 	void onToggleBeep();
 
-	void onMacroTable();
-	void onConvertTool();
 	void onQuickConvert();
 
 	void onInputType(const int& type);
 	void onTableCode(const int& code);
 
-	void onOpenKeyAbout();
 	void onOpenKeyExit();
 };

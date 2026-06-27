@@ -50,12 +50,6 @@ int vRunAsAdmin = 0;
 //beta feature
 int vFixChromiumBrowser = 0; //new on version 2.0
 
-bool AppDelegate::isDialogMsg(MSG & msg) const {
-	return (macroDialog != NULL && IsDialogMessage(macroDialog->getHwnd(), &msg)) || 
-		(convertDialog != NULL && IsDialogMessage(convertDialog->getHwnd(), &msg)) || 
-		(aboutDialog != NULL && IsDialogMessage(aboutDialog->getHwnd(), &msg));
-}
-
 
 AppDelegate::AppDelegate() {
 	_instance = this;
@@ -90,29 +84,15 @@ int AppDelegate::run(HINSTANCE hInstance) {
 		if (msg.message == WM_KEYDOWN) {
 			OpenKeyManager::_lastKeyCode = (UINT16)msg.wParam;
 		}
-		if (!isDialogMsg(msg)) {
-			TranslateMessage(&msg);
-			DispatchMessage(&msg);
-		}
+		TranslateMessage(&msg);
+		DispatchMessage(&msg);
 	}
 	return 0;
 }
 
 
 
-void AppDelegate::closeDialog(BaseDialog * dialog) {
-	dialog->closeDialog();
-	if (aboutDialog == dialog) {
-		delete aboutDialog;
-		aboutDialog = NULL;
-	} else if (macroDialog == dialog) {
-		delete macroDialog;
-		macroDialog = NULL;
-	} else if (convertDialog == dialog) {
-		delete convertDialog;
-		convertDialog = NULL;
-	}
-}
+
 
 void AppDelegate::onInputMethodChangedFromHotKey() {
 	APP_SET_DATA(vLanguage, vLanguage);
@@ -161,17 +141,17 @@ void AppDelegate::onToggleVietnamese() {
 }
 
 void AppDelegate::onToggleCheckSpelling() {
-	APP_SET_DATA(vCheckSpelling, 0);
+	APP_SET_DATA(vCheckSpelling, vCheckSpelling ? 0 : 1);
 
 	vSetCheckSpelling();
 }
 
 void AppDelegate::onToggleUseSmartSwitchKey() {
-	APP_SET_DATA(vUseSmartSwitchKey, 0);
+	APP_SET_DATA(vUseSmartSwitchKey, vUseSmartSwitchKey ? 0 : 1);
 }
 
 void AppDelegate::onToggleUseMacro() {
-	APP_SET_DATA(vUseMacro, 0);
+	APP_SET_DATA(vUseMacro, vUseMacro ? 0 : 1);
 }
 
 void AppDelegate::onSetSwitchKey(const unsigned int& keyStatus) {
@@ -225,23 +205,7 @@ void AppDelegate::onToggleBeep() {
 	}
 }
 
-void AppDelegate::onMacroTable() {
-	if (macroDialog == NULL) {
-		macroDialog = new MacroDialog(hInstance, IDD_DIALOG_MACRO);
-		macroDialog->show();
-	} else {
-		macroDialog->bringOnTop();
-	}
-}
 
-void AppDelegate::onConvertTool() {
-	if (convertDialog == NULL) {
-		convertDialog = new ConvertToolDialog(hInstance, IDD_DIALOG_CONVERT_TOOL);
-		convertDialog->show();
-	} else {
-		convertDialog->bringOnTop();
-	}
-}
 
 void AppDelegate::onQuickConvert() {
 	if (OpenKeyHelper::quickConvert()) {
@@ -268,14 +232,7 @@ void AppDelegate::onTableCode(const int & code) {
 }
 
 
-void AppDelegate::onOpenKeyAbout() {
-	if (aboutDialog == NULL) {
-		aboutDialog = new AboutDialog(hInstance, IDD_ABOUTBOX);
-		aboutDialog->show();
-	} else {
-		aboutDialog->bringOnTop();
-	}
-}
+
 
 void AppDelegate::onOpenKeyExit() {
 	OpenKeyManager::freeEngine();

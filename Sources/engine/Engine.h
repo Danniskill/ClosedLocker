@@ -33,8 +33,8 @@
 #define HAS_COMMAND(data) ((data & 0x400) ? 1 : 0)
 #define HAS_SHIFT(data) ((data & 0x800) ? 1 : 0)
 #define GET_BOOL(data) (data ? 1 : 0)
-#define HAS_BEEP(data) (data & 0x8000)
-#define SET_SWITCH_KEY(data, key) data = (data & 0xFF) | key
+#define HAS_BEEP(data) (data & 0x1000)
+#define SET_SWITCH_KEY(data, key) data = (data & ~0xFF) | key
 #define SET_CONTROL_KEY(data, val) data|=val<<8;
 #define SET_OPTION_KEY(data, val) data|=val<<9;
 #define SET_COMMAND_KEY(data, val) data|=val<<10;

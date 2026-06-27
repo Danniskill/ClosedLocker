@@ -13,12 +13,12 @@
 #include <memory.h>
 
 //option
-bool convertToolDontAlertWhenCompleted = false;
-bool convertToolToAllCaps = false;
-bool convertToolToAllNonCaps = false;
-bool convertToolToCapsFirstLetter = false;
-bool convertToolToCapsEachWord = false;
-bool convertToolRemoveMark = false;
+int convertToolDontAlertWhenCompleted = 0;
+int convertToolToAllCaps = 0;
+int convertToolToAllNonCaps = 0;
+int convertToolToCapsFirstLetter = 0;
+int convertToolToCapsEachWord = 0;
+int convertToolRemoveMark = 0;
 Uint8 convertToolFromCode = 0;
 Uint8 convertToolToCode = 0;
 int convertToolHotKey = 0;

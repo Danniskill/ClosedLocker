@@ -13,12 +13,12 @@
 #include <string>
 using namespace std;
 
-extern bool convertToolDontAlertWhenCompleted;
-extern bool convertToolToAllCaps;
-extern bool convertToolToAllNonCaps;
-extern bool convertToolToCapsFirstLetter;
-extern bool convertToolToCapsEachWord;
-extern bool convertToolRemoveMark;
+extern int convertToolDontAlertWhenCompleted;
+extern int convertToolToAllCaps;
+extern int convertToolToAllNonCaps;
+extern int convertToolToCapsFirstLetter;
+extern int convertToolToCapsEachWord;
+extern int convertToolRemoveMark;
 extern Uint8 convertToolFromCode;
 extern Uint8 convertToolToCode;
 extern int convertToolHotKey;

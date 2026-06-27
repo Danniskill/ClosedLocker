@@ -73,7 +73,8 @@ void OpenKeyManager::createDesktopShortcut() {
 			wsprintf(savePath, _T("%s\\CsL.lnk"), desktopPath);
 			hres = pPersistFile->Save(savePath, TRUE);
 			pPersistFile->Release();
-			pShellLink->Release();
 		}
+		pShellLink->Release();
 	}
+	CoUninitialize();
 }

@@ -169,11 +169,7 @@
     <ClInclude Include="..\..\engine\platforms\win32.h" />
     <ClInclude Include="..\..\engine\SmartSwitchKey.h" />
     <ClInclude Include="..\..\engine\Vietnamese.h" />
-    <ClInclude Include="AboutDialog.h" />
     <ClInclude Include="AppDelegate.h" />
-    <ClInclude Include="BaseDialog.h" />
-    <ClInclude Include="ConvertToolDialog.h" />
-    <ClInclude Include="MacroDialog.h" />
 
     <ClInclude Include="OpenKeyHelper.h" />
     <ClInclude Include="OpenKeyManager.h" />
@@ -188,11 +184,7 @@
     <ClCompile Include="..\..\engine\Macro.cpp" />
     <ClCompile Include="..\..\engine\SmartSwitchKey.cpp" />
     <ClCompile Include="..\..\engine\Vietnamese.cpp" />
-    <ClCompile Include="AboutDialog.cpp" />
     <ClCompile Include="AppDelegate.cpp" />
-    <ClCompile Include="BaseDialog.cpp" />
-    <ClCompile Include="ConvertToolDialog.cpp" />
-    <ClCompile Include="MacroDialog.cpp" />
     <ClCompile Include="main.cpp" />
 
     <ClCompile Include="OpenKey.cpp" />

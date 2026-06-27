@@ -49,8 +49,8 @@ redistribute your new version, it MUST be open source.
 using namespace std;
 
 extern wchar_t _logBuffer[1024];
-#define LOG(...)  wsprintfW(_logBuffer, __VA_ARGS__); \
-					OutputDebugString(_logBuffer);
+#define LOG(...)  do { wsprintfW(_logBuffer, __VA_ARGS__); \
+					OutputDebugString(_logBuffer); } while (0)
 
 #define APP_SET_DATA(KEY, VAL) KEY = VAL; OpenKeyHelper::setRegInt(_T(#KEY), KEY)
 #define APP_GET_DATA(KEY, DEFAULT_VAL) KEY = OpenKeyHelper::getRegInt(_T(#KEY), DEFAULT_VAL)
@@ -76,7 +76,6 @@ extern int vSendKeyStepByStep;
 extern int vUseSmartSwitchKey;
 extern int vUpperCaseFirstChar;
 extern int vUseGrayIcon;
-extern int vShowOnStartUp;
 extern int vRunWithWindows;
 extern int vSupportMetroApp;
 extern int vCreateDesktopShortcut;

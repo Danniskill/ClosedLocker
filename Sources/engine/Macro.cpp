@@ -131,10 +131,14 @@ void getMacroSaveData(vector<Byte>& outData) {
 
 static bool modifyCaseUnicode(Uint32& code, const bool& isUpperCase=true) {
     _charBuff = code;
-    if (!(code & CHAR_CODE_MASK)) { //for normal char
-        code &= isUpperCase ? CAPS_MASK :  ~CAPS_MASK;
-        return code != _charBuff;
-    }
+    	if (!(code & CHAR_CODE_MASK)) { //for normal char
+		if (isUpperCase) {
+			code |= CAPS_MASK;
+		} else {
+			code &= ~CAPS_MASK;
+		}
+		return code != _charBuff;
+	}    
     
     //for unicode character
     for (map<Uint32, vector<Uint16>>::iterator it = _codeTable[vCodeTable].begin(); it != _codeTable[vCodeTable].end(); ++it) {
@@ -277,7 +281,7 @@ void readFromFile(const string& path, const bool& append) {
 					if (string::npos != pos) {
 						name += ":";
 						name += content.substr(0, pos);
-						content = content.substr(pos + 1, line.length() - pos - 1);
+						content = content.substr(pos + 1, content.length() - pos - 1);
 					} else {
 						break;
 					}

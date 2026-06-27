@@ -15,6 +15,7 @@ redistribute your new version, it MUST be open source.
 #include "AppDelegate.h"
 
 #define WM_TRAYMESSAGE (WM_USER + 1)
+#define WM_TRAY_REOPEN_MENU (WM_USER + 2)
 #define TRAY_ICONUID 100
 
 #define POPUP_VIET_ON_OFF 900
@@ -75,10 +76,8 @@ extern int vInputType;
 extern int vCodeTable;
 #include "../../engine/ConvertTool.h"
 
-#define MODIFY_MENU(MENU, COMMAND, DATA) ModifyMenu(MENU, COMMAND, \
-											MF_BYCOMMAND | (DATA ? MF_CHECKED : MF_UNCHECKED), \
-											COMMAND, \
-											menuData[COMMAND]);
+#define CHECK_MENU(COMMAND, DATA) CheckMenuItem(popupMenu, COMMAND, \
+											MF_BYCOMMAND | (DATA ? MF_CHECKED : MF_UNCHECKED));
 
 static HMENU popupMenu;
 static HMENU menuInputType;
@@ -132,22 +131,20 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) 
 		// do nothing
 		break;
 	case WM_TRAYMESSAGE: {
-		if (lParam == WM_LBUTTONDBLCLK) {
-			AppDelegate::getInstance()->onToggleVietnamese();
-			SystemTrayHelper::updateData();
-		}
+		static POINT lastPopupPoint;
 		if (lParam == WM_LBUTTONUP) {
 			AppDelegate::getInstance()->onToggleVietnamese();
 			SystemTrayHelper::updateData();
-		} else if (lParam == WM_RBUTTONDOWN) {
-			POINT curPoint;
-			GetCursorPos(&curPoint);
+		} else if (lParam == WM_RBUTTONDOWN || lParam == WM_TRAY_REOPEN_MENU) {
+			if (lParam == WM_RBUTTONDOWN) {
+				GetCursorPos(&lastPopupPoint);
+			}
 			SetForegroundWindow(hWnd);
 			UINT commandId = TrackPopupMenu(
 				popupMenu,
 				TPM_RETURNCMD | TPM_NONOTIFY,
-				curPoint.x,
-				curPoint.y,
+				lastPopupPoint.x,
+				lastPopupPoint.y,
 				0,
 				hWnd,
 				NULL
@@ -155,9 +152,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) 
 			switch (commandId) {
 			case POPUP_VIET_ON_OFF:
 				AppDelegate::getInstance()->onToggleVietnamese();
-				break;
-			case POPUP_CONVERT_TOOL:
-				AppDelegate::getInstance()->onConvertTool();
 				break;
 			case POPUP_QUICK_CONVERT:
 				AppDelegate::getInstance()->onQuickConvert();
@@ -186,26 +180,23 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) 
 			case POPUP_VN_LOCALE_1258:
 				AppDelegate::getInstance()->onTableCode(4);
 				break;
-			case POPUP_MACRO_TABLE:
-				AppDelegate::getInstance()->onMacroTable();
-				break;
 			case POPUP_SWITCH_CTRL_SHIFT:
-				AppDelegate::getInstance()->onSetSwitchKey((vSwitchKeyStatus & 0x0000FF00) | 0x5A000900 | 0xFE); // 0x5A is version/magic, 09 is Ctrl+Shift (1|8)
+				AppDelegate::getInstance()->onSetSwitchKey(0x5A0009FE | (vSwitchKeyStatus & 0x1000));
 				break;
 			case POPUP_SWITCH_ALT_Z:
-				AppDelegate::getInstance()->onSetSwitchKey((vSwitchKeyStatus & 0x0000FF00) | 0x5A000200 | 'Z'); // 02 is Alt
+				AppDelegate::getInstance()->onSetSwitchKey(0x5A00025A | (vSwitchKeyStatus & 0x1000));
 				break;
 			case POPUP_SWITCH_CTRL_SPACE:
-				AppDelegate::getInstance()->onSetSwitchKey((vSwitchKeyStatus & 0x0000FF00) | 0x5A000100 | VK_SPACE); // 01 is Ctrl
+				AppDelegate::getInstance()->onSetSwitchKey(0x5A000120 | (vSwitchKeyStatus & 0x1000));
 				break;
 			case POPUP_SWITCH_SHIFT_SPACE:
-				AppDelegate::getInstance()->onSetSwitchKey((vSwitchKeyStatus & 0x0000FF00) | 0x5A000800 | VK_SPACE); // 08 is Shift
+				AppDelegate::getInstance()->onSetSwitchKey(0x5A000820 | (vSwitchKeyStatus & 0x1000));
 				break;
 			case POPUP_SWITCH_WIN_SPACE:
-				AppDelegate::getInstance()->onSetSwitchKey((vSwitchKeyStatus & 0x0000FF00) | 0x5A000400 | VK_SPACE); // 04 is Win
+				AppDelegate::getInstance()->onSetSwitchKey(0x5A000420 | (vSwitchKeyStatus & 0x1000));
 				break;
 			case POPUP_SWITCH_ALT_SPACE:
-				AppDelegate::getInstance()->onSetSwitchKey((vSwitchKeyStatus & 0x0000FF00) | 0x5A000200 | VK_SPACE); // 02 is Alt
+				AppDelegate::getInstance()->onSetSwitchKey(0x5A000220 | (vSwitchKeyStatus & 0x1000));
 				break;
 			case POPUP_OPT_MODERN_ORTHO:
 				AppDelegate::getInstance()->onToggleModernOrtho();
@@ -234,23 +225,12 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) 
 			case POPUP_SYS_BEEP:
 				AppDelegate::getInstance()->onToggleBeep();
 				break;
-			case POPUP_ABOUT_OPENKEY:
-				AppDelegate::getInstance()->onOpenKeyAbout();
-				break;
-			case POPUP_OPENKEY_EXIT:
-				AppDelegate::getInstance()->onOpenKeyExit();
-				break;
 			}
-			SystemTrayHelper::updateData();
-
 			bool keepMenuOpen = (commandId != 0 && 
-								 commandId != POPUP_ABOUT_OPENKEY && 
 								 commandId != POPUP_OPENKEY_EXIT && 
-								 commandId != POPUP_MACRO_TABLE && 
-								 commandId != POPUP_CONVERT_TOOL && 
 								 commandId != POPUP_QUICK_CONVERT);
 			if (keepMenuOpen) {
-				PostMessage(hWnd, WM_TRAYMESSAGE, 0, WM_RBUTTONDOWN);
+				PostMessage(hWnd, WM_TRAYMESSAGE, 0, WM_TRAY_REOPEN_MENU);
 			}
 		}
 	}
@@ -340,9 +320,7 @@ void SystemTrayHelper::createPopupMenu() {
 
 	AppendMenu(popupMenu, MF_SEPARATOR, 0, 0);
 
-	AppendMenu(popupMenu, MF_STRING, POPUP_MACRO_TABLE, menuData[POPUP_MACRO_TABLE]);
-	AppendMenu(popupMenu, MF_STRING, POPUP_CONVERT_TOOL, menuData[POPUP_CONVERT_TOOL]);
-	AppendMenu(popupMenu, MF_STRING, POPUP_ABOUT_OPENKEY, menuData[POPUP_ABOUT_OPENKEY]);
+	AppendMenu(popupMenu, MF_STRING, POPUP_QUICK_CONVERT, menuData[POPUP_QUICK_CONVERT]);
 	AppendMenu(popupMenu, MF_SEPARATOR, 0, 0);
 	AppendMenu(popupMenu, MF_UNCHECKED, POPUP_OPENKEY_EXIT, menuData[POPUP_OPENKEY_EXIT]);
 
@@ -366,17 +344,17 @@ void SystemTrayHelper::updateData() {
 	loadTrayIcon();
 	Shell_NotifyIcon(NIM_MODIFY, &nid);
 
-	MODIFY_MENU(popupMenu, POPUP_VIET_ON_OFF, vLanguage);
+	CHECK_MENU(POPUP_VIET_ON_OFF, vLanguage);
 
-	MODIFY_MENU(menuInputType, POPUP_TELEX, vInputType == 0);
-	MODIFY_MENU(menuInputType, POPUP_VNI, vInputType == 1);
-	MODIFY_MENU(menuInputType, POPUP_SIMPLE_TELEX, vInputType == 2);
+	CHECK_MENU(POPUP_TELEX, vInputType == 0);
+	CHECK_MENU(POPUP_VNI, vInputType == 1);
+	CHECK_MENU(POPUP_SIMPLE_TELEX, vInputType == 2);
 
-	MODIFY_MENU(menuTableCode, POPUP_UNICODE, vCodeTable == 0);
-	MODIFY_MENU(menuTableCode, POPUP_TCVN3, vCodeTable == 1);
-	MODIFY_MENU(menuTableCode, POPUP_VNI_WINDOWS, vCodeTable == 2);
-	MODIFY_MENU(otherCode, POPUP_UNICODE_COMPOUND, vCodeTable == 3);
-	MODIFY_MENU(otherCode, POPUP_VN_LOCALE_1258, vCodeTable == 4);
+	CHECK_MENU(POPUP_UNICODE, vCodeTable == 0);
+	CHECK_MENU(POPUP_TCVN3, vCodeTable == 1);
+	CHECK_MENU(POPUP_VNI_WINDOWS, vCodeTable == 2);
+	CHECK_MENU(POPUP_UNICODE_COMPOUND, vCodeTable == 3);
+	CHECK_MENU(POPUP_VN_LOCALE_1258, vCodeTable == 4);
 
 	bool isCtrlShift = (vSwitchKeyStatus & 0xFFFFFF00) == 0x5A000900; // Ctrl + Shift + NoKey?
 	// Wait, we need a better way to represent shortcut keys.
@@ -387,24 +365,24 @@ void SystemTrayHelper::updateData() {
 	bool hasShift = (vSwitchKeyStatus & 0x800) != 0;
 	unsigned short key = (vSwitchKeyStatus & 0xFF);
 
-	MODIFY_MENU(menuSwitchKey, POPUP_SWITCH_CTRL_SHIFT, hasCtrl && hasShift && !hasAlt && !hasWin && key == 0xFE);
-	MODIFY_MENU(menuSwitchKey, POPUP_SWITCH_ALT_Z, hasAlt && !hasCtrl && !hasShift && !hasWin && key == 'Z');
-	MODIFY_MENU(menuSwitchKey, POPUP_SWITCH_CTRL_SPACE, hasCtrl && !hasShift && !hasAlt && !hasWin && key == VK_SPACE);
-	MODIFY_MENU(menuSwitchKey, POPUP_SWITCH_SHIFT_SPACE, hasShift && !hasCtrl && !hasAlt && !hasWin && key == VK_SPACE);
-	MODIFY_MENU(menuSwitchKey, POPUP_SWITCH_WIN_SPACE, hasWin && !hasCtrl && !hasShift && !hasAlt && key == VK_SPACE);
-	MODIFY_MENU(menuSwitchKey, POPUP_SWITCH_ALT_SPACE, hasAlt && !hasCtrl && !hasShift && !hasWin && key == VK_SPACE);
+	CHECK_MENU(POPUP_SWITCH_CTRL_SHIFT, hasCtrl && hasShift && !hasAlt && !hasWin && key == 0xFE);
+	CHECK_MENU(POPUP_SWITCH_ALT_Z, hasAlt && !hasCtrl && !hasShift && !hasWin && key == 'Z');
+	CHECK_MENU(POPUP_SWITCH_CTRL_SPACE, hasCtrl && !hasShift && !hasAlt && !hasWin && key == VK_SPACE);
+	CHECK_MENU(POPUP_SWITCH_SHIFT_SPACE, hasShift && !hasCtrl && !hasAlt && !hasWin && key == VK_SPACE);
+	CHECK_MENU(POPUP_SWITCH_WIN_SPACE, hasWin && !hasCtrl && !hasShift && !hasAlt && key == VK_SPACE);
+	CHECK_MENU(POPUP_SWITCH_ALT_SPACE, hasAlt && !hasCtrl && !hasShift && !hasWin && key == VK_SPACE);
 
-	MODIFY_MENU(menuTypingOpt, POPUP_OPT_MODERN_ORTHO, vUseModernOrthography);
-	MODIFY_MENU(menuTypingOpt, POPUP_OPT_CAPS_FIRST, vUpperCaseFirstChar);
-	MODIFY_MENU(menuTypingOpt, POPUP_OPT_USE_CLIPBOARD, vSendKeyStepByStep == 0);
-	MODIFY_MENU(menuTypingOpt, POPUP_OPT_FIX_BROWSER, vFixRecommendBrowser);
-	MODIFY_MENU(menuTypingOpt, POPUP_OPT_FIX_CHROMIUM, vFixChromiumBrowser);
+	CHECK_MENU(POPUP_OPT_MODERN_ORTHO, vUseModernOrthography);
+	CHECK_MENU(POPUP_OPT_CAPS_FIRST, vUpperCaseFirstChar);
+	CHECK_MENU(POPUP_OPT_USE_CLIPBOARD, vSendKeyStepByStep == 0);
+	CHECK_MENU(POPUP_OPT_FIX_BROWSER, vFixRecommendBrowser);
+	CHECK_MENU(POPUP_OPT_FIX_CHROMIUM, vFixChromiumBrowser);
 
-	MODIFY_MENU(menuSystem, POPUP_SYS_STARTUP, vRunWithWindows);
-	MODIFY_MENU(menuSystem, POPUP_SYS_METRO, vSupportMetroApp);
-	MODIFY_MENU(menuSystem, POPUP_SYS_MODERN_ICON, vUseGrayIcon);
+	CHECK_MENU(POPUP_SYS_STARTUP, vRunWithWindows);
+	CHECK_MENU(POPUP_SYS_METRO, vSupportMetroApp);
+	CHECK_MENU(POPUP_SYS_MODERN_ICON, vUseGrayIcon);
 	bool hasBeep = (vSwitchKeyStatus & 0x1000) != 0;
-	MODIFY_MENU(menuSystem, POPUP_SYS_BEEP, hasBeep);
+	CHECK_MENU(POPUP_SYS_BEEP, hasBeep);
 
 	wstring hotkey = L"";
 	bool hasAdd = false;

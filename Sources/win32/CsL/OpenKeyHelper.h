@@ -14,13 +14,13 @@ redistribute your new version, it MUST be open source.
 #pragma once
 #include "stdafx.h"
 
-extern int CF_RTF;
-extern int CF_HTML;
-extern int CF_OPENKEY;
+extern UINT CF_RTF;
+extern UINT CF_HTML;
+extern UINT CF_OPENKEY;
 
 class OpenKeyHelper {
 private:
-	static void openKey();
+	static HKEY openKey();
 public:
 	static void setRegInt(LPCTSTR key, const int& val);
 	static int getRegInt(LPCTSTR key, const int& defaultValue);
